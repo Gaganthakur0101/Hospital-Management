@@ -16,6 +16,7 @@ interface HospitalData {
     hospitalType: "Government" | "Private" | "Clinic";
     description: string;
     establishedYear: number;
+    images: string[];
     emergencyAvailable: boolean;
     ambulanceAvailable: boolean;
     specialities: string;
@@ -38,6 +39,7 @@ const Page = () => {
         emergencyAvailable: false,
         ambulanceAvailable: false,
         specialities: "",
+        images: [],
     });
 
     const [ownerId, setOwnerId] = useState<string | null>(null);
@@ -126,7 +128,7 @@ const Page = () => {
         }
 
         try {
-            const res = await fetch("/api/users/registerHospital", {
+            const res = await fetch("/api/hospitals/registerHospital", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

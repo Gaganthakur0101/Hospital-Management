@@ -63,7 +63,7 @@ const HospitalCard: React.FC<HospitalCardProps> = ({
 
         {/* Show Details */}
         <button
-          onClick={() => router.push(`/hospital/${id}`)}
+          onClick={() => router.push(`/hospitalList/${id}`)}
           className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 font-medium hover:bg-gray-100 hover:shadow-md transition-all duration-300"
         >
           Show Details
