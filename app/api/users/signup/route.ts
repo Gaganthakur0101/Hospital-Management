@@ -1,6 +1,5 @@
 import { connect } from "@/lib/dbconfig";
 import User from "@/models/userModel";
-import bcrypt from "bcryptjs";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
@@ -85,9 +84,10 @@ export async function POST(request: NextRequest) {
 
         return response;
 
-    } catch (error: any) {
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : "Something went wrong";
         return NextResponse.json(
-            { error: error.message },
+            { error: message },
             { status: 500 }
         );
     }

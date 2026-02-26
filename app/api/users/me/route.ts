@@ -3,6 +3,10 @@ import User from "@/models/userModel";
 import { NextRequest, NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 
+type AuthTokenPayload = jwt.JwtPayload & {
+    id?: string;
+};
+
 export async function GET(request: NextRequest) {
     await connect();
 
@@ -18,7 +22,10 @@ export async function GET(request: NextRequest) {
         }
 
         // Verify token
-        const decodedToken = jwt.verify(checkingToken, process.env.JWT_SECRET as string) as any;
+        const decodedToken = jwt.verify(
+            checkingToken,
+            process.env.JWT_SECRET as string
+        ) as AuthTokenPayload;
 
         if (!decodedToken.id) {
             return NextResponse.json(
@@ -48,9 +55,10 @@ export async function GET(request: NextRequest) {
             },
             { status: 200 }
         );
-    } catch (error: any) {
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : "Something went wrong";
         return NextResponse.json(
-            { error: error.message },
+            { error: message },
             { status: 500 }
         );
     }

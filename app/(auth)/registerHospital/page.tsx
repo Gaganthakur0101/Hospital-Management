@@ -42,22 +42,24 @@ const Page = () => {
         images: [],
     });
 
-    const [ownerId, setOwnerId] = useState<string | null>(null);
+    const [ownerId] = useState<string | null>(() => {
+        if (typeof window === "undefined") return null;
+        return localStorage.getItem("userId");
+    });
+
+    const [userRole] = useState<string | null>(() => {
+        if (typeof window === "undefined") return null;
+        return localStorage.getItem("userRole");
+    });
 
     useEffect(() => {
-        const storedRole = localStorage.getItem("userRole");
-        const storedUserId = localStorage.getItem("userId");
-
-        if (storedRole !== "doctor") {
+        if (userRole && userRole !== "doctor") {
             toast.error("Only doctors can register hospitals");
             router.replace("/profile");
-            return;
         }
+    }, [router, userRole]);
 
-        setOwnerId(storedUserId);
-    }, [router]);
-
-    const getFriendlyError = (error: any) => {
+    const getFriendlyError = (error: unknown): string => {
         if (typeof error === "string" && error.trim().startsWith("[")) {
             try {
                 const parsed = JSON.parse(error);
@@ -81,7 +83,7 @@ const Page = () => {
                 state: "State",
             };
 
-            const messages = error.map((issue: any) => {
+            const messages = (error as Array<{ path?: unknown; message?: string }>).map((issue) => {
                 const field = Array.isArray(issue?.path) ? issue.path[0] : undefined;
                 const label = field ? labelMap[field] || "Field" : "Field";
 
@@ -163,7 +165,7 @@ const Page = () => {
                 toast.success(data.message);
                 router.push("/hospital/details");
             }
-        } catch (err: any) {
+        } catch {
             toast.error("Something went wrong");
         }
     };

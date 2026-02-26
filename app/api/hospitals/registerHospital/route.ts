@@ -4,6 +4,11 @@ import User from "@/models/userModel";
 import { connect } from "@/lib/dbconfig";
 import jwt from "jsonwebtoken";
 
+type AuthTokenPayload = jwt.JwtPayload & {
+  id: string;
+  role?: string;
+};
+
 export async function POST(request: NextRequest) {
   await connect();
 
@@ -17,10 +22,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const decoded: any = jwt.verify(
+    const decoded = jwt.verify(
       token,
       process.env.JWT_SECRET as string
-    );
+    ) as AuthTokenPayload;
+
+    if (!decoded?.id) {
+      return NextResponse.json(
+        { error: "Invalid token" },
+        { status: 401 }
+      );
+    }
 
     const user = await User.findById(decoded.id);
 
@@ -42,9 +54,10 @@ export async function POST(request: NextRequest) {
       { message: "Hospital registered successfully", data: newHospital },
       { status: 201 }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Something went wrong";
     return NextResponse.json(
-      { error: error.message },
+      { error: message },
       { status: 500 }
     );
   }

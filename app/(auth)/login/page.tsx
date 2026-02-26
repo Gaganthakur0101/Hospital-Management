@@ -13,7 +13,7 @@ const Page = () => {
     password: ""
   })
 
-  const onLogin = async (e: any) => {
+  const onLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     try {
@@ -35,7 +35,7 @@ const Page = () => {
           router.push(`/profile/${data.user.id}`);
         }
       }
-    } catch (error: any) {
+    } catch {
       toast.error("Something went wrong")
     }
 
@@ -56,7 +56,7 @@ const Page = () => {
           </h1>
         </div>
 
-        <form className="space-y-3">
+        <form className="space-y-3" onSubmit={onLogin}>
 
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
@@ -93,7 +93,7 @@ const Page = () => {
           </div>
 
           <button
-            onClick={onLogin}
+            type="submit"
             className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-3 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 mt-3"
           >
             Sign in
@@ -102,7 +102,7 @@ const Page = () => {
         </form>
 
         <p className="text-sm text-center text-gray-600 mt-8">
-          Don't have an account?{" "}
+          Don&apos;t have an account?{" "}
           <a href="/signup" className="text-blue-600 hover:text-blue-700 font-semibold hover:underline transition-colors">
             Sign up for free
           </a>

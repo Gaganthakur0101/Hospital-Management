@@ -13,7 +13,7 @@ const Page = () => {
     const inputClass =
         "w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 placeholder:text-gray-400 text-gray-900";
 
-    const onSubmit = async (e: any) => {
+    const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setLoading(true);
 
@@ -35,7 +35,7 @@ const Page = () => {
                 setShowOtp(true);
             }
 
-        } catch (error: any) {
+        } catch {
             toast.error("Something went wrong");
         } finally {
             setLoading(false);
@@ -65,7 +65,7 @@ const Page = () => {
                 toast.success("OTP Verified Successfully");
             }
 
-        } catch (error) {
+        } catch {
             toast.error("Verification failed");
         }
     };

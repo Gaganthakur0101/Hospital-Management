@@ -118,8 +118,11 @@ const Page = () => {
       }
       const data = await res.json();
       setHospitalList(data);
-    } catch (error) {
-      toast.error("something went wrong while fetching hospitals");
+    } catch (error: unknown) {
+      const message = error instanceof Error
+        ? error.message
+        : "something went wrong while fetching hospitals";
+      toast.error(message);
     } finally {
       setLoading(false);
     }

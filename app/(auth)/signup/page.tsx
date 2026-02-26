@@ -19,7 +19,7 @@ const Page = () => {
         role: "patient", // Default role set to patient
     })
 
-    const onSignup = async (e: any) => {
+    const onSignup = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
         try {
@@ -41,7 +41,7 @@ const Page = () => {
             }
 
 
-        } catch (err: any) {
+        } catch {
             toast.error("Something went wrong");
         }
     };
@@ -61,7 +61,7 @@ const Page = () => {
                     </h1>
                 </div>
 
-                <form className="space-y-5">
+                <form className="space-y-5" onSubmit={onSignup}>
 
                     <div>
                         <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
@@ -110,6 +110,8 @@ const Page = () => {
                             <option value="patient">Patient</option>
                             <option value="doctor">Doctor</option>
                         </select>
+                    </div>
+
                     {/* Password Section */}
                     {/* User creates a password for account security */}
                     <div>
@@ -127,9 +129,7 @@ const Page = () => {
                     </div>
 
                     {/* Confirm Password Field */}
-                    {/* User re-enters password to ensure it matches and prevent typos */}                       
-                    </div>
-
+                    {/* User re-enters password to ensure it matches and prevent typos */}
                     <div>
                         <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700 mb-2">
                             Confirm password
@@ -145,7 +145,7 @@ const Page = () => {
                     </div>
 
                     <button
-                        onClick={onSignup}
+                        type="submit"
                         className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-3 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 mt-4"
                     >
                         Create account
@@ -155,9 +155,9 @@ const Page = () => {
 
                 <p className="text-sm text-center text-gray-600 mt-8">
                     Already have an account?{" "}
-                    <a href="/login" className="text-blue-600 hover:text-blue-700 font-semibold hover:underline transition-colors">
+                    <Link href="/login" className="text-blue-600 hover:text-blue-700 font-semibold hover:underline transition-colors">
                         Sign in
-                    </a>
+                    </Link>
                 </p>
 
             </div>

@@ -24,6 +24,7 @@ const HospitalCard: React.FC<HospitalCardProps> = ({
 
       {/* LEFT - Image */}
       <div className="relative w-full md:w-48 h-40 md:h-auto overflow-hidden">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={image}
           alt="Hospital"
@@ -42,7 +43,7 @@ const HospitalCard: React.FC<HospitalCardProps> = ({
 
         {/* Specialities */}
         <div className="mt-2 flex flex-wrap gap-2">
-          {specialities.map((spec, index) => (
+          {(specialities ?? []).map((spec, index) => (
             <span
               key={index}
               className="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-full font-medium hover:bg-blue-200 transition"

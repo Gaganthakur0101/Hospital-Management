@@ -17,14 +17,20 @@ export async function POST(req: NextRequest) {
                 { status: 400 },
             )
         } else {
-            
+            return NextResponse.json(
+                { message: "OTP sent to your email" },
+                { status: 200 },
+            )
         }
 
 
 
-    } catch (error: any) {
+    } catch (error: unknown) {
+        const message = error instanceof Error
+            ? error.message
+            : "Something went wrong try again later";
         return NextResponse.json(
-            { message: "Something went wrong try again later" },
+            { message },
             { status: 400 },
         )
     }

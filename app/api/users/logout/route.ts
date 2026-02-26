@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { connect } from "@/lib/dbconfig";
 
 
-export async function POST(request: NextRequest) {
+export async function POST() {
     await connect();
     try {
         const response = NextResponse.json({
@@ -19,9 +19,12 @@ export async function POST(request: NextRequest) {
 
         return response;
     }
-    catch (error) {
+    catch (error: unknown) {
+        const message = error instanceof Error
+            ? error.message
+            : "An error occurred while logging out";
         return NextResponse.json(
-            { error: "An error occurred while logging out" },
+            { error: message },
             { status: 500 }
         );
     }
