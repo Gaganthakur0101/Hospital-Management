@@ -133,15 +133,20 @@ const Page = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-100 to-slate-200 pt-12 pb-16">
+    <div className="relative min-h-screen overflow-hidden bg-slate-950 pb-16 pt-12">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute -left-16 top-16 h-72 w-72 rounded-full bg-cyan-500/20 blur-3xl" />
+        <div className="absolute right-0 top-1/3 h-80 w-80 rounded-full bg-emerald-400/15 blur-3xl" />
+      </div>
+
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* Header Section */}
-        <div className="mb-10 bg-white rounded-2xl shadow-md p-5 sm:p-6 border border-slate-200">
-          <h1 className="text-3xl font-bold text-slate-900">
+        <div className="relative mb-10 rounded-2xl border border-white/15 bg-white/8 p-5 shadow-2xl backdrop-blur-xl sm:p-6">
+          <h1 className="text-3xl font-black text-white">
             Find Your Best Hospital
           </h1>
-          <p className="text-slate-500 mt-2">
+          <p className="mt-2 text-slate-300">
             {hospitalList.length} Hospitals available in your area
           </p>
         </div>
@@ -150,7 +155,7 @@ const Page = () => {
         <div className="space-y-8">
 
           {loading ? (
-            <p className="text-center text-gray-500">Loading hospitals...</p>
+            <p className="text-center text-slate-300">Loading hospitals...</p>
           ) : hospitalList.length > 0 ? (
             hospitalList.map((hospital) => (
               <HospitalCard
@@ -163,7 +168,7 @@ const Page = () => {
               />
             ))
           ) : (
-            <p className="text-center text-gray-500">
+            <p className="text-center text-slate-300">
               No hospitals found
             </p>
           )}

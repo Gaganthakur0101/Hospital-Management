@@ -75,11 +75,11 @@ const Navbar = () => {
     };
 
     return (
-        <nav className="bg-white shadow-md sticky top-0 z-50">
+        <nav className="sticky top-0 z-50 border-b border-white/10 bg-slate-950/80 shadow-[0_10px_35px_rgba(6,182,212,0.12)] backdrop-blur-xl">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between items-center h-16">
                     {/* Logo - Left Side */}
-                    <div className="flex-shrink-0 flex items-center">
+                    <div className="shrink-0 flex items-center">
                         <Link href={user ? `/profile/${user.id}` : "/"} className="flex items-center space-x-2">
                             <Image 
                                 src={Logo} 
@@ -88,7 +88,7 @@ const Navbar = () => {
                                 height={40}
                                 className="rounded-lg"
                             />
-                            <span className="text-xl font-bold text-blue-600 hidden sm:block">
+                            <span className="hidden text-xl font-extrabold text-cyan-200 sm:block">
                                 MediCare
                             </span>
                         </Link>
@@ -98,13 +98,13 @@ const Navbar = () => {
                     <div className="hidden md:flex space-x-8 items-center">
                         <Link 
                             href={user ? `/profile/${user.id}` : "/"} 
-                            className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                            className="rounded-lg px-3 py-2 text-sm font-semibold text-slate-200 transition-all duration-200 hover:bg-white/10 hover:text-cyan-200"
                         >
                             Home
                         </Link>
                         <Link 
                             href="/hospitalList" 
-                            className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                            className="rounded-lg px-3 py-2 text-sm font-semibold text-slate-200 transition-all duration-200 hover:bg-white/10 hover:text-cyan-200"
                         >
                             Hospitals List
                         </Link>
@@ -114,19 +114,19 @@ const Navbar = () => {
                             <>
                                 <Link 
                                     href="/hospitals/popular" 
-                                    className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                                    className="rounded-lg px-3 py-2 text-sm font-semibold text-slate-200 transition-all duration-200 hover:bg-white/10 hover:text-cyan-200"
                                 >
                                     Popular Hospitals
                                 </Link>
                                 <Link 
                                     href="/about" 
-                                    className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                                    className="rounded-lg px-3 py-2 text-sm font-semibold text-slate-200 transition-all duration-200 hover:bg-white/10 hover:text-cyan-200"
                                 >
                                     About
                                 </Link>
                                 <Link 
                                     href="/contact" 
-                                    className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                                    className="rounded-lg px-3 py-2 text-sm font-semibold text-slate-200 transition-all duration-200 hover:bg-white/10 hover:text-cyan-200"
                                 >
                                     Contact
                                 </Link>
@@ -142,7 +142,7 @@ const Navbar = () => {
                                 {user.role === 'doctor' && (
                                     <Link
                                         href="/registerHospital"
-                                        className="hidden md:block bg-green-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-green-700 transition-colors"
+                                        className="hidden rounded-lg bg-emerald-400 px-4 py-2 text-sm font-bold text-slate-950 transition-all duration-200 hover:scale-[1.02] hover:bg-emerald-300 md:block"
                                     >
                                         Register Hospital
                                     </Link>
@@ -152,36 +152,36 @@ const Navbar = () => {
                                 <div className="relative">
                                     <button
                                         onClick={() => setShowProfileMenu(!showProfileMenu)}
-                                        className="flex items-center justify-center w-10 h-10 rounded-full bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors"
+                                        className="flex h-10 w-10 items-center justify-center rounded-full border border-cyan-200/30 bg-cyan-400/20 font-semibold text-cyan-100 transition-all duration-200 hover:bg-cyan-300/30"
                                     >
                                         {getInitials(user.name)}
                                     </button>
 
                                     {/* Profile Dropdown */}
                                     {showProfileMenu && (
-                                        <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 border border-gray-200">
-                                            <div className="px-4 py-2 border-b border-gray-200">
-                                                <p className="text-sm font-semibold text-gray-900">{user.name}</p>
-                                                <p className="text-xs text-gray-500">{user.email}</p>
-                                                <p className="text-xs text-blue-600 capitalize mt-1">{user.role}</p>
+                                        <div className="absolute right-0 mt-2 w-52 rounded-xl border border-white/15 bg-slate-900/95 py-1 shadow-2xl backdrop-blur-xl">
+                                            <div className="border-b border-white/10 px-4 py-2">
+                                                <p className="text-sm font-semibold text-cyan-100">{user.name}</p>
+                                                <p className="text-xs text-slate-300">{user.email}</p>
+                                                <p className="mt-1 text-xs capitalize text-cyan-300">{user.role}</p>
                                             </div>
                                             <Link
                                                 href={`/profile/${user.id}`}
-                                                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                                className="block px-4 py-2 text-sm text-slate-100 transition-colors hover:bg-white/10"
                                                 onClick={() => setShowProfileMenu(false)}
                                             >
                                                 My Profile
                                             </Link>
                                             <Link
-                                                href="/profile"
-                                                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                                href={`/profile/${user.id}`}
+                                                className="block px-4 py-2 text-sm text-slate-100 transition-colors hover:bg-white/10"
                                                 onClick={() => setShowProfileMenu(false)}
                                             >
                                                 Settings
                                             </Link>
                                             <button
                                                 onClick={handleLogout}
-                                                className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                                                className="block w-full px-4 py-2 text-left text-sm text-rose-300 transition-colors hover:bg-white/10"
                                             >
                                                 Logout
                                             </button>
@@ -194,13 +194,13 @@ const Navbar = () => {
                                 {/* Login & Signup Buttons - Not Logged In */}
                                 <Link
                                     href="/login"
-                                    className="text-blue-600 hover:text-blue-700 px-4 py-2 rounded-md text-sm font-medium transition-colors"
+                                    className="rounded-lg border border-cyan-200/40 px-4 py-2 text-sm font-semibold text-cyan-100 transition-all duration-200 hover:bg-cyan-300/10"
                                 >
                                     Login
                                 </Link>
                                 <Link
                                     href="/signup"
-                                    className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors"
+                                    className="rounded-lg bg-cyan-400 px-4 py-2 text-sm font-bold text-slate-950 transition-all duration-200 hover:scale-[1.02] hover:bg-cyan-300"
                                 >
                                     Sign Up
                                 </Link>
@@ -210,7 +210,7 @@ const Navbar = () => {
                         {/* Mobile Menu Button */}
                         <button
                             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                            className="md:hidden text-gray-700 hover:text-blue-600 p-2"
+                            className="p-2 text-slate-200 transition-colors hover:text-cyan-200 md:hidden"
                         >
                             <svg
                                 className="h-6 w-6"
@@ -233,18 +233,18 @@ const Navbar = () => {
 
                 {/* Mobile Menu */}
                 {isMobileMenuOpen && (
-                    <div className="md:hidden border-t border-gray-200">
+                    <div className="border-t border-white/10 bg-slate-900/95 md:hidden">
                         <div className="px-2 pt-2 pb-3 space-y-1">
                             <Link
                                 href={user ? `/profile/${user.id}` : "/"}
-                                className="block text-gray-700 hover:bg-gray-100 px-3 py-2 rounded-md text-base font-medium"
+                                className="block rounded-lg px-3 py-2 text-base font-semibold text-slate-100 transition-colors hover:bg-white/10"
                                 onClick={() => setIsMobileMenuOpen(false)}
                             >
                                 Home
                             </Link>
                             <Link
-                                href="/hospitals"
-                                className="block text-gray-700 hover:bg-gray-100 px-3 py-2 rounded-md text-base font-medium"
+                                href="/hospitalList"
+                                className="block rounded-lg px-3 py-2 text-base font-semibold text-slate-100 transition-colors hover:bg-white/10"
                                 onClick={() => setIsMobileMenuOpen(false)}
                             >
                                 Hospitals List
@@ -255,21 +255,21 @@ const Navbar = () => {
                                 <>
                                     <Link
                                         href="/hospitals/popular"
-                                        className="block text-gray-700 hover:bg-gray-100 px-3 py-2 rounded-md text-base font-medium"
+                                        className="block rounded-lg px-3 py-2 text-base font-semibold text-slate-100 transition-colors hover:bg-white/10"
                                         onClick={() => setIsMobileMenuOpen(false)}
                                     >
                                         Popular Hospitals
                                     </Link>
                                     <Link
                                         href="/about"
-                                        className="block text-gray-700 hover:bg-gray-100 px-3 py-2 rounded-md text-base font-medium"
+                                        className="block rounded-lg px-3 py-2 text-base font-semibold text-slate-100 transition-colors hover:bg-white/10"
                                         onClick={() => setIsMobileMenuOpen(false)}
                                     >
                                         About
                                     </Link>
                                     <Link
                                         href="/contact"
-                                        className="block text-gray-700 hover:bg-gray-100 px-3 py-2 rounded-md text-base font-medium"
+                                        className="block rounded-lg px-3 py-2 text-base font-semibold text-slate-100 transition-colors hover:bg-white/10"
                                         onClick={() => setIsMobileMenuOpen(false)}
                                     >
                                         Contact
@@ -280,7 +280,7 @@ const Navbar = () => {
                             {user?.role === 'doctor' && (
                                 <Link
                                     href="/registerHospital"
-                                    className="block bg-green-600 text-white px-3 py-2 rounded-md text-base font-medium hover:bg-green-700"
+                                    className="block rounded-lg bg-emerald-400 px-3 py-2 text-base font-bold text-slate-950 transition-colors hover:bg-emerald-300"
                                     onClick={() => setIsMobileMenuOpen(false)}
                                 >
                                     Register Hospital

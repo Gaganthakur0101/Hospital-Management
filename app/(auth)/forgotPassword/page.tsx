@@ -11,7 +11,7 @@ const Page = () => {
     const [loading, setLoading] = React.useState(false);
 
     const inputClass =
-        "w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 placeholder:text-gray-400 text-gray-900";
+        "w-full rounded-xl border border-cyan-100/30 bg-slate-900/70 px-4 py-3 text-slate-100 placeholder:text-slate-400 outline-none transition focus:border-cyan-300/70 focus:ring-4 focus:ring-cyan-300/15";
 
     const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -71,16 +71,20 @@ const Page = () => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 px-4 py-8">
+        <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-slate-950 px-4 py-10">
+            <div className="pointer-events-none absolute inset-0">
+                <div className="absolute -left-20 top-8 h-72 w-72 rounded-full bg-cyan-500/20 blur-3xl" />
+                <div className="absolute right-0 top-1/2 h-80 w-80 rounded-full bg-emerald-400/15 blur-3xl" />
+            </div>
 
-            <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-gray-100 p-8 sm:p-10">
+            <div className="relative w-full max-w-md rounded-3xl border border-white/15 bg-white/8 p-8 shadow-2xl backdrop-blur-xl sm:p-10">
 
                 <div className="mb-6">
-                    <p className="text-sm font-medium text-gray-500 mb-2">
+                    <p className="mb-2 text-sm font-semibold uppercase tracking-[0.16em] text-cyan-200">
                         Password Recovery
                     </p>
 
-                    <h1 className="text-3xl font-bold text-gray-900 tracking-tight">
+                    <h1 className="text-3xl font-black tracking-tight text-white">
                         Enter your email
                     </h1>
                 </div>
@@ -90,7 +94,7 @@ const Page = () => {
                     <div>
                         <label
                             htmlFor="email"
-                            className="block text-sm font-medium text-gray-700 mb-2"
+                            className="mb-2 block text-sm font-medium text-slate-200"
                         >
                             Email address
                         </label>
@@ -111,7 +115,7 @@ const Page = () => {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-3 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 mt-2 disabled:opacity-70"
+                            className="mt-2 w-full rounded-xl bg-cyan-400 py-3 font-bold text-slate-950 transition-all duration-200 hover:scale-[1.01] hover:bg-cyan-300 disabled:opacity-70"
                         >
                             {loading ? "Sending..." : "Continue"}
                         </button>
@@ -122,7 +126,7 @@ const Page = () => {
                             <div>
                                 <label
                                     htmlFor="otp"
-                                    className="block text-sm font-medium text-gray-700 mb-2"
+                                    className="mb-2 block text-sm font-medium text-slate-200"
                                 >
                                     Enter OTP
                                 </label>
@@ -141,7 +145,7 @@ const Page = () => {
                             <button
                                 type="button"
                                 onClick={verifyOtp}
-                                className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg mt-2"
+                                className="mt-2 w-full rounded-xl bg-emerald-400 py-3 font-bold text-slate-950 transition-all duration-200 hover:scale-[1.01] hover:bg-emerald-300"
                             >
                                 Verify OTP
                             </button>

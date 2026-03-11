@@ -171,46 +171,46 @@ const Page = () => {
     };
 
     const inputClass =
-        "w-full rounded-xl border border-slate-200 bg-white/95 px-4 py-3 text-slate-900 placeholder:text-slate-400 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-4 focus:ring-sky-100 transition";
+        "w-full rounded-xl border border-cyan-100/30 bg-slate-900/70 px-4 py-3 text-slate-100 placeholder:text-slate-400 shadow-sm outline-none transition focus:border-cyan-300/70 focus:ring-4 focus:ring-cyan-300/15";
 
     return (
-        <div className="relative min-h-screen overflow-hidden bg-slate-50 px-4 py-10">
-            <div className="pointer-events-none absolute -top-20 -right-24 h-72 w-72 rounded-full bg-sky-100/70 blur-3xl" />
-            <div className="pointer-events-none absolute -bottom-24 -left-16 h-80 w-80 rounded-full bg-blue-100/70 blur-3xl" />
+        <div className="relative min-h-screen overflow-hidden bg-slate-950 px-4 py-10">
+            <div className="pointer-events-none absolute -top-20 -right-24 h-72 w-72 rounded-full bg-cyan-500/20 blur-3xl" />
+            <div className="pointer-events-none absolute -bottom-24 -left-16 h-80 w-80 rounded-full bg-emerald-400/15 blur-3xl" />
 
             <div className="mx-auto w-full max-w-3xl">
-                <div className="mb-8 rounded-3xl border border-slate-100 bg-white/90 p-6 shadow-[0_20px_50px_rgba(15,23,42,0.08)] sm:p-8">
+                <div className="mb-8 rounded-3xl border border-white/15 bg-white/8 p-6 shadow-2xl backdrop-blur-xl sm:p-8">
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                         <div>
-                            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-600">
+                            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-200">
                                 Hospital onboarding
                             </p>
-                            <h1 className="mt-2 text-3xl font-semibold text-slate-900 sm:text-4xl">
+                            <h1 className="mt-2 text-3xl font-black text-white sm:text-4xl">
                                 Register your hospital
                             </h1>
-                            <p className="mt-3 max-w-xl text-sm leading-relaxed text-slate-600">
+                            <p className="mt-3 max-w-xl text-sm leading-relaxed text-slate-200">
                                 Provide core details and clinical capabilities so patients can find your facility faster.
                             </p>
                         </div>
-                        <div className="rounded-2xl border border-sky-100 bg-sky-50 px-4 py-3 text-sm text-slate-600">
-                            <p className="font-medium text-slate-700">Need help?</p>
+                        <div className="rounded-2xl border border-cyan-100/30 bg-cyan-300/10 px-4 py-3 text-sm text-slate-200">
+                            <p className="font-medium text-cyan-100">Need help?</p>
                             <p>Call our onboarding team.</p>
                         </div>
                     </div>
                 </div>
 
-                <div className="rounded-3xl border border-slate-100 bg-white/95 p-6 shadow-[0_18px_40px_rgba(15,23,42,0.08)] sm:p-10">
+                <div className="rounded-3xl border border-white/15 bg-white/8 p-6 shadow-2xl backdrop-blur-xl sm:p-10">
                     <form className="space-y-7">
                         <section className="space-y-4">
                             <div className="flex items-center justify-between">
-                                <h2 className="text-lg font-semibold text-slate-900">Hospital information</h2>
-                                <span className="rounded-full bg-sky-50 px-3 py-1 text-xs font-medium text-sky-700">
+                                <h2 className="text-lg font-semibold text-white">Hospital information</h2>
+                                <span className="rounded-full bg-cyan-300/15 px-3 py-1 text-xs font-medium text-cyan-100">
                                     Required
                                 </span>
                             </div>
 
                             <div>
-                                <label htmlFor="hospitalName" className="block text-sm font-medium text-slate-700">
+                                <label htmlFor="hospitalName" className="block text-sm font-medium text-slate-200">
                                     Hospital name *
                                 </label>
                                 <input
@@ -225,7 +225,7 @@ const Page = () => {
 
                             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                 <div>
-                                    <label htmlFor="phoneNumber" className="block text-sm font-medium text-slate-700">
+                                    <label htmlFor="phoneNumber" className="block text-sm font-medium text-slate-200">
                                         Phone number *
                                     </label>
                                     <input
@@ -239,7 +239,7 @@ const Page = () => {
                                 </div>
 
                                 <div>
-                                    <label htmlFor="hospitalType" className="block text-sm font-medium text-slate-700">
+                                    <label htmlFor="hospitalType" className="block text-sm font-medium text-slate-200">
                                         Hospital type *
                                     </label>
                                     <select
@@ -262,10 +262,10 @@ const Page = () => {
                         </section>
 
                         <section className="space-y-4">
-                            <h2 className="text-lg font-semibold text-slate-900">Location details</h2>
+                            <h2 className="text-lg font-semibold text-white">Location details</h2>
 
                             <div>
-                                <label htmlFor="address" className="block text-sm font-medium text-slate-700">
+                                <label htmlFor="address" className="block text-sm font-medium text-slate-200">
                                     Address *
                                 </label>
                                 <input
@@ -280,7 +280,7 @@ const Page = () => {
 
                             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                 <div>
-                                    <label htmlFor="city" className="block text-sm font-medium text-slate-700">
+                                    <label htmlFor="city" className="block text-sm font-medium text-slate-200">
                                         City *
                                     </label>
                                     <input
@@ -294,7 +294,7 @@ const Page = () => {
                                 </div>
 
                                 <div>
-                                    <label htmlFor="state" className="block text-sm font-medium text-slate-700">
+                                    <label htmlFor="state" className="block text-sm font-medium text-slate-200">
                                         State *
                                     </label>
                                     <input
@@ -309,7 +309,7 @@ const Page = () => {
                             </div>
 
                             <div>
-                                <label htmlFor="pincode" className="block text-sm font-medium text-slate-700">
+                                <label htmlFor="pincode" className="block text-sm font-medium text-slate-200">
                                     Pincode *
                                 </label>
                                 <input
@@ -324,11 +324,11 @@ const Page = () => {
                         </section>
 
                         <section className="space-y-4">
-                            <h2 className="text-lg font-semibold text-slate-900">Registration details</h2>
+                            <h2 className="text-lg font-semibold text-white">Registration details</h2>
 
                             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                 <div>
-                                    <label htmlFor="registrationFees" className="block text-sm font-medium text-slate-700">
+                                    <label htmlFor="registrationFees" className="block text-sm font-medium text-slate-200">
                                         Registration fees *
                                     </label>
                                     <input
@@ -348,7 +348,7 @@ const Page = () => {
                                 </div>
 
                                 <div>
-                                    <label htmlFor="establishedYear" className="block text-sm font-medium text-slate-700">
+                                    <label htmlFor="establishedYear" className="block text-sm font-medium text-slate-200">
                                         Established year *
                                     </label>
                                     <input
@@ -370,10 +370,10 @@ const Page = () => {
                         </section>
 
                         <section className="space-y-4">
-                            <h2 className="text-lg font-semibold text-slate-900">Availability</h2>
+                            <h2 className="text-lg font-semibold text-white">Availability</h2>
 
                             <div className="grid gap-3 sm:grid-cols-2">
-                                <label className="flex items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3">
+                                <label className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/8 px-4 py-3">
                                     <input
                                         type="checkbox"
                                         checked={hospital.emergencyAvailable}
@@ -383,12 +383,12 @@ const Page = () => {
                                                 emergencyAvailable: e.target.checked,
                                             })
                                         }
-                                        className="h-4 w-4 rounded border-slate-300 text-sky-600 focus:ring-4 focus:ring-sky-100"
+                                        className="h-4 w-4 rounded border-slate-300 text-cyan-300 focus:ring-4 focus:ring-cyan-300/20"
                                     />
-                                    <span className="text-sm text-slate-700">24/7 emergency available</span>
+                                    <span className="text-sm text-slate-100">24/7 emergency available</span>
                                 </label>
 
-                                <label className="flex items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3">
+                                <label className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/8 px-4 py-3">
                                     <input
                                         type="checkbox"
                                         checked={hospital.ambulanceAvailable}
@@ -398,27 +398,27 @@ const Page = () => {
                                                 ambulanceAvailable: e.target.checked,
                                             })
                                         }
-                                        className="h-4 w-4 rounded border-slate-300 text-sky-600 focus:ring-4 focus:ring-sky-100"
+                                        className="h-4 w-4 rounded border-slate-300 text-cyan-300 focus:ring-4 focus:ring-cyan-300/20"
                                     />
-                                    <span className="text-sm text-slate-700">Ambulance available</span>
+                                    <span className="text-sm text-slate-100">Ambulance available</span>
                                 </label>
                             </div>
                         </section>
 
                         <section className="space-y-4">
-                            <h2 className="text-lg font-semibold text-slate-900">Hospital description *</h2>
+                            <h2 className="text-lg font-semibold text-white">Hospital description *</h2>
                             <textarea
                                 id="description"
                                 rows={4}
                                 placeholder="Describe services, departments, and special capabilities"
                                 value={hospital.description}
                                 onChange={(e) => setHospital({ ...hospital, description: e.target.value })}
-                                className={`${inputClass} min-h-[120px]`}
+                                className={`${inputClass} min-h-30`}
                             />
                         </section>
 
                         <section className="space-y-3">
-                            <h2 className="text-lg font-semibold text-slate-900">Specialities</h2>
+                            <h2 className="text-lg font-semibold text-white">Specialities</h2>
                             <input
                                 id="specialities"
                                 type="text"
@@ -427,20 +427,20 @@ const Page = () => {
                                 onChange={(e) => setHospital({ ...hospital, specialities: e.target.value })}
                                 className={inputClass}
                             />
-                            <p className="text-xs text-slate-500">Separate each speciality with a comma.</p>
+                            <p className="text-xs text-slate-300">Separate each speciality with a comma.</p>
                         </section>
 
                         <div className="flex flex-col gap-4 pt-2 sm:flex-row sm:items-center sm:justify-between">
                             <button
                                 onClick={onRegister}
-                                className="inline-flex items-center justify-center rounded-xl bg-sky-600 px-6 py-3 text-sm font-semibold text-white shadow-[0_10px_20px_rgba(14,116,144,0.25)] transition hover:bg-sky-700"
+                                className="inline-flex items-center justify-center rounded-xl bg-cyan-400 px-6 py-3 text-sm font-bold text-slate-950 transition duration-200 hover:scale-[1.01] hover:bg-cyan-300"
                             >
                                 Register hospital
                             </button>
 
-                            <p className="text-sm text-slate-600">
+                            <p className="text-sm text-slate-300">
                                 Already registered?{" "}
-                                <Link href="/login" className="font-semibold text-sky-600 hover:text-sky-700">
+                                <Link href="/login" className="font-semibold text-cyan-200 hover:text-cyan-100">
                                     Sign in here
                                 </Link>
                             </p>
