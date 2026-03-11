@@ -1,20 +1,23 @@
-import { match } from "assert";
-import { NextResponse , NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+
+const publicRoutes = new Set(["/", "/login", "/signup", "/hospitalList"]);
 
 export default function middleware(request: NextRequest) {
     const path = request.nextUrl.pathname;
 
-    const PublicRoute = path === "/login" || path === "/signup" || path === "/" || path === "/hospitalList";
+    if (publicRoutes.has(path)) {
+        return NextResponse.next();
+    }
 
-    const token = request.cookies.get("token")?.value || null;
+    const token = request.cookies.get("token")?.value;
 
-    if(token === null && !PublicRoute) {
+    if (!token) {
         return NextResponse.redirect(new URL("/login", request.url));
     }
+
+    return NextResponse.next();
 }
 
 export const config = {
-    matcher: [
-        
-    ],
-}
+    matcher: ["/((?!api|_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml).*)"],
+};
