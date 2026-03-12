@@ -63,7 +63,7 @@ const HospitalCard: React.FC<HospitalCardProps> = ({
       <div className="flex justify-center gap-3 border-t border-white/10 bg-slate-900/35 p-5 md:flex-col md:border-t-0 md:border-l">
 
         {/* Show Details */}
-        <button
+        <button 
           onClick={() => router.push(`/hospitalList/${id}`)}
           className="rounded-lg border border-cyan-100/40 px-4 py-2 font-medium text-cyan-100 transition-all duration-300 hover:bg-cyan-300/10"
         >

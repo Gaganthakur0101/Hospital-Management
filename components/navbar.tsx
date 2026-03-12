@@ -18,6 +18,7 @@ const Navbar = () => {
     const pathname = usePathname();
     const [user, setUser] = useState<User | null>(null);
     const [showProfileMenu, setShowProfileMenu] = useState(false);
+    const [showRegisterMenu, setShowRegisterMenu] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
     // Check if user is logged in by verifying with database
@@ -113,10 +114,10 @@ const Navbar = () => {
                         {user && (
                             <>
                                 <Link 
-                                    href="/hospitals/popular" 
+                                    href="/doctors" 
                                     className="rounded-lg px-3 py-2 text-sm font-semibold text-slate-200 transition-all duration-200 hover:bg-white/10 hover:text-cyan-200"
                                 >
-                                    Popular Hospitals
+                                    Doctors List
                                 </Link>
                                 <Link 
                                     href="/about" 
@@ -138,15 +139,47 @@ const Navbar = () => {
                     <div className="flex items-center space-x-4">
                         {user ? (
                             <>
-                                {/* Register Hospital Button - Only for Doctors */}
-                                {user.role === 'doctor' && (
-                                    <Link
-                                        href="/registerHospital"
-                                        className="hidden rounded-lg bg-emerald-400 px-4 py-2 text-sm font-bold text-slate-950 transition-all duration-200 hover:scale-[1.02] hover:bg-emerald-300 md:block"
+                                {/* Register Dropdown */}
+                                <div className="relative hidden md:block">
+                                    <button
+                                        onClick={() => {
+                                            setShowRegisterMenu(!showRegisterMenu);
+                                            setShowProfileMenu(false);
+                                        }}
+                                        className="inline-flex items-center gap-2 rounded-lg bg-emerald-400 px-4 py-2 text-sm font-bold text-slate-950 transition-all duration-200 hover:scale-[1.02] hover:bg-emerald-300"
                                     >
-                                        Register Hospital
-                                    </Link>
-                                )}
+                                        Register
+                                        <svg
+                                            className={`h-4 w-4 transition-transform ${showRegisterMenu ? 'rotate-180' : ''}`}
+                                            fill="none"
+                                            stroke="currentColor"
+                                            strokeWidth="2"
+                                            viewBox="0 0 24 24"
+                                            aria-hidden="true"
+                                        >
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                                        </svg>
+                                    </button>
+
+                                    {showRegisterMenu && (
+                                        <div className="absolute right-0 mt-2 w-56 rounded-xl border border-white/15 bg-slate-900/95 py-1 shadow-2xl backdrop-blur-xl">
+                                            <Link
+                                                href="/register/registerHospital"
+                                                className="block px-4 py-2 text-sm text-slate-100 transition-colors hover:bg-white/10"
+                                                onClick={() => setShowRegisterMenu(false)}
+                                            >
+                                                Register your hospital
+                                            </Link>
+                                            <Link
+                                                href="/register/registerDoctor"
+                                                className="block px-4 py-2 text-sm text-slate-100 transition-colors hover:bg-white/10"
+                                                onClick={() => setShowRegisterMenu(false)}
+                                            >
+                                                Register as a Doctor
+                                            </Link>
+                                        </div>
+                                    )}
+                                </div>
 
                                 {/* Notification Button - Only for Logged In Users */}
                                 <Link
@@ -169,7 +202,10 @@ const Navbar = () => {
                                 {/* User Profile */}
                                 <div className="relative">
                                     <button
-                                        onClick={() => setShowProfileMenu(!showProfileMenu)}
+                                        onClick={() => {
+                                            setShowProfileMenu(!showProfileMenu);
+                                            setShowRegisterMenu(false);
+                                        }}
                                         className="flex h-10 w-10 items-center justify-center rounded-full border border-cyan-200/30 bg-cyan-400/20 font-semibold text-cyan-100 transition-all duration-200 hover:bg-cyan-300/30"
                                     >
                                         {getInitials(user.name)}
@@ -302,14 +338,24 @@ const Navbar = () => {
                                 </>
                             )}
                             
-                            {user?.role === 'doctor' && (
-                                <Link
-                                    href="/registerHospital"
-                                    className="block rounded-lg bg-emerald-400 px-3 py-2 text-base font-bold text-slate-950 transition-colors hover:bg-emerald-300"
-                                    onClick={() => setIsMobileMenuOpen(false)}
-                                >
-                                    Register Hospital
-                                </Link>
+                            {user && (
+                                <div className="space-y-1 pt-1">
+                                    <p className="px-3 text-xs font-semibold uppercase tracking-wider text-emerald-300">Register</p>
+                                    <Link
+                                        href="/register/registerHospital"
+                                        className="block rounded-lg bg-emerald-400 px-3 py-2 text-base font-bold text-slate-950 transition-colors hover:bg-emerald-300"
+                                        onClick={() => setIsMobileMenuOpen(false)}
+                                    >
+                                        Register your hospital
+                                    </Link>
+                                    <Link
+                                        href="/signup"
+                                        className="block rounded-lg border border-cyan-200/40 px-3 py-2 text-base font-semibold text-cyan-100 transition-colors hover:bg-cyan-300/10"
+                                        onClick={() => setIsMobileMenuOpen(false)}
+                                    >
+                                        Register as a Doctor
+                                    </Link>
+                                </div>
                             )}
                         </div>
                     </div>

@@ -134,47 +134,134 @@ const Page = () => {
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-slate-950 pb-16 pt-12">
+      {/* Animated background blobs */}
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -left-16 top-16 h-72 w-72 rounded-full bg-cyan-500/20 blur-3xl" />
-        <div className="absolute right-0 top-1/3 h-80 w-80 rounded-full bg-emerald-400/15 blur-3xl" />
+        <div className="absolute -left-16 top-16 h-72 w-72 rounded-full bg-cyan-500/20 blur-3xl animate-float-slow" />
+        <div className="absolute right-0 top-1/3 h-80 w-80 rounded-full bg-emerald-400/15 blur-3xl animate-float-fast" />
+        <div className="absolute bottom-0 left-1/2 h-72 w-72 rounded-full bg-blue-400/15 blur-3xl animate-float-slow" />
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative">
 
         {/* Header Section */}
-        <div className="relative mb-10 rounded-2xl border border-white/15 bg-white/8 p-5 shadow-2xl backdrop-blur-xl sm:p-6">
-          <h1 className="text-3xl font-black text-white">
+        <div className="animate-rise-up mb-10 rounded-2xl border border-white/15 bg-white/8 p-5 shadow-2xl backdrop-blur-xl sm:p-6">
+          <p className="mb-2 text-sm font-semibold uppercase tracking-widest text-cyan-400">Healthcare Network</p>
+          <h1 className="text-3xl font-black text-white sm:text-4xl">
             Find Your Best Hospital
           </h1>
-          <p className="mt-2 text-slate-300">
-            {hospitalList.length} Hospitals available in your area
+          <p className="mt-3 text-slate-300">
+            Browse and discover {hospitalList.length} quality hospitals available in your area
           </p>
         </div>
 
         {/* Hospital List */}
-        <div className="space-y-8">
+        <div className="space-y-6">
 
           {loading ? (
-            <p className="text-center text-slate-300">Loading hospitals...</p>
+            <div className="animate-fade-in-delayed rounded-2xl border border-white/10 bg-white/5 p-8 text-center backdrop-blur-sm">
+              <div className="inline-block">
+                <div className="h-12 w-12 animate-spin rounded-full border-4 border-slate-600 border-t-cyan-400"></div>
+              </div>
+              <p className="mt-4 text-slate-300">Loading hospitals...</p>
+            </div>
           ) : hospitalList.length > 0 ? (
-            hospitalList.map((hospital) => (
-              <HospitalCard
+            hospitalList.map((hospital, index) => (
+              <div
                 key={hospital._id}
-                id={hospital._id}
-                name={hospital.hospitalName}
-                specialities={hospital.specialities}
-                address={`${hospital.address}, ${hospital.city}, ${hospital.state}`}
-                image={hospital.image}
-              />
+                style={{
+                  opacity: 0,
+                  animation: `fadeInCard 1s ease-out ${0.2 + index * 0.15}s forwards`
+                }}
+              >
+                <HospitalCard
+                  id={hospital._id}
+                  name={hospital.hospitalName}
+                  specialities={hospital.specialities}
+                  address={`${hospital.address}, ${hospital.city}, ${hospital.state}`}
+                  image={hospital.image}
+                />
+              </div>
             ))
           ) : (
-            <p className="text-center text-slate-300">
-              No hospitals found
-            </p>
+            <div className="animate-fade-in-delayed rounded-2xl border border-white/10 bg-white/5 p-8 text-center backdrop-blur-sm">
+              <p className="text-xl text-slate-300">No hospitals found</p>
+            </div>
           )}
 
         </div>
       </div>
+
+      {/* Animations */}
+      <style jsx>{`
+        .animate-rise-up {
+          animation: riseUp 0.85s ease-out forwards;
+        }
+
+        .animate-fade-in-delayed {
+          opacity: 0;
+          animation: fadeInCard 1s ease-out 0.3s forwards;
+        }
+
+        .animate-float-slow {
+          animation: floatSlow 10s ease-in-out infinite;
+        }
+
+        .animate-float-fast {
+          animation: floatFast 7s ease-in-out infinite;
+        }
+
+        .animate-spin {
+          animation: spin 1s linear infinite;
+        }
+
+        @keyframes riseUp {
+          from {
+            opacity: 0;
+            transform: translateY(24px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        @keyframes fadeInCard {
+          from {
+            opacity: 0;
+            transform: translateY(22px) scale(0.98);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
+        }
+
+        @keyframes floatSlow {
+          0%,
+          100% {
+            transform: translateY(0px);
+          }
+          50% {
+            transform: translateY(-16px);
+          }
+        }
+
+        @keyframes floatFast {
+          0%,
+          100% {
+            transform: translateY(0px);
+          }
+          50% {
+            transform: translateY(-11px);
+          }
+        }
+
+        @keyframes spin {
+          to {
+            transform: rotate(360deg);
+          }
+        }
+      `}</style>
     </div>
   );
 };
