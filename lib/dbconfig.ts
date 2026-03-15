@@ -2,7 +2,6 @@ import mongoose from "mongoose";
 
 export async function connect() {
     try{
-        // Prevent multiple connections
         if (mongoose.connection.readyState === 1) {
             return;
         }
