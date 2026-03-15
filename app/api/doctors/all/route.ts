@@ -1,12 +1,9 @@
 import {NextRequest , NextResponse} from "next/server";
 import doctor from "@/models/doctorModel";
 
-export async function GET(request: NextRequest, {params} : {params : {id : string}}) {
+export async function GET(request: NextRequest) {
     try {
-        const doctorData = await doctor.findById(params.id);
-        if (!doctorData) {
-            return NextResponse.json({message: "Doctor not found"}, {status: 404});
-        }
+        const doctorData = await doctor.find();
         return NextResponse.json(doctorData, {status: 200});
     } catch (error) {
         console.error("Error fetching doctor data:", error);

@@ -1,13 +1,13 @@
 import React from 'react';
 
 type PageProps = {
-    params: {
+    params: Promise<{
         id: string;
-    };
+    }>;
 };
 
 const Page = async ({ params }: PageProps) => {
-    const { id } = params;
+    const { id } = await params;
     return (
         <main className="relative min-h-[calc(100vh-64px)] overflow-hidden bg-slate-950 px-4 py-14 sm:px-8">
             <div className="pointer-events-none absolute inset-0">

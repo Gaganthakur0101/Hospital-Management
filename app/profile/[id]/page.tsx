@@ -3,12 +3,6 @@
 import Link from 'next/link';
 import React, { useEffect, useState, useMemo } from 'react';
 
-type PageProps = {
-    params: {
-        id: string;
-    };
-};
-
 interface User {
     id: string;
     name: string;
@@ -23,8 +17,7 @@ const rotatingLines = [
     'Experience premium healthcare',
 ];
 
-const Page = ({ params }: PageProps) => {
-    const { id } = params;
+const Page = () => {
     const [user, setUser] = useState<User | null>(null);
     const [lineIndex, setLineIndex] = useState(0);
     const [displayedText, setDisplayedText] = useState('');
@@ -114,8 +107,8 @@ const Page = ({ params }: PageProps) => {
                 {/* Typing animation text */}
                 <div className="mt-4 min-h-16 mb-3">
                     <p className="text-lg font-medium sm:text-xl animate-color-shift" style={{ fontFamily: '"Lucida Sans", "Gill Sans", sans-serif' }}>
-                        <span className="text-transparent bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text">{displayedText}</span>
-                        <span className="ml-1 inline-block h-6 w-0.5 animate-cursor bg-gradient-to-b from-cyan-400 to-blue-500 align-middle" />
+                        <span className="text-transparent bg-linear-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text">{displayedText}</span>
+                        <span className="ml-1 inline-block h-6 w-0.5 animate-cursor bg-linear-to-b from-cyan-400 to-blue-500 align-middle" />
                     </p>
                 </div>
 
