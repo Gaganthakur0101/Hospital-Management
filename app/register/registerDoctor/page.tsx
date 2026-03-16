@@ -96,7 +96,7 @@ const Page = () => {
             }
 
             toast.success(data.message || "Doctor registered successfully");
-            router.push("/profile");
+            router.push("/doctors");
         } catch {
             toast.error("Something went wrong");
         }

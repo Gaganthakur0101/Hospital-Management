@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 interface User {
     id: string;
@@ -17,12 +17,30 @@ const rotatingLines = [
     'Experience premium healthcare',
 ];
 
+const statConfigs = [
+    { key: 'hospitals', label: 'Hospitals', target: 500, suffix: '+' },
+    { key: 'doctors', label: 'Doctors', target: 2000, suffix: '+' },
+    { key: 'patients', label: 'Happy Patients', target: 50, suffix: 'K+' },
+    { key: 'support', label: 'Support', target: 24, suffix: '/7' },
+] as const;
+
+type StatKey = (typeof statConfigs)[number]['key'];
+type AnimatedStats = Record<StatKey, number>;
+
 const Page = () => {
     const [user, setUser] = useState<User | null>(null);
     const [lineIndex, setLineIndex] = useState(0);
     const [displayedText, setDisplayedText] = useState('');
     const [isDeleting, setIsDeleting] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
+    const [hasStartedCountUp, setHasStartedCountUp] = useState(false);
+    const [animatedStats, setAnimatedStats] = useState<AnimatedStats>({
+        hospitals: 0,
+        doctors: 0,
+        patients: 0,
+        support: 0,
+    });
+    const statsSectionRef = useRef<HTMLDivElement | null>(null);
 
     const currentLine = useMemo(() => rotatingLines[lineIndex], [lineIndex]);
 
@@ -79,6 +97,79 @@ const Page = () => {
         return () => window.clearTimeout(timer);
     }, [currentLine, displayedText, isDeleting]);
 
+    // Start number animation only when stats section enters the viewport.
+    useEffect(() => {
+        const section = statsSectionRef.current;
+
+        if (!section || hasStartedCountUp) {
+            return;
+        }
+
+        const observer = new IntersectionObserver(
+            (entries) => {
+                const [entry] = entries;
+                if (entry.isIntersecting) {
+                    setHasStartedCountUp(true);
+                    observer.disconnect();
+                }
+            },
+            { threshold: 0.35 }
+        );
+
+        observer.observe(section);
+
+        return () => observer.disconnect();
+    }, [hasStartedCountUp]);
+
+    useEffect(() => {
+        if (!hasStartedCountUp) {
+            return;
+        }
+
+        const animationFrameIds: number[] = [];
+        const startedAt = performance.now();
+
+        statConfigs.forEach((stat, index) => {
+            const statDelay = index * 140;
+            const duration = 1150 + index * 220;
+
+            const animate = (now: number) => {
+                const elapsed = now - startedAt - statDelay;
+                const progress = Math.min(Math.max(elapsed / duration, 0), 1);
+                const easedProgress = 1 - Math.pow(1 - progress, 3);
+                const nextValue = Math.round(stat.target * easedProgress);
+
+                setAnimatedStats((prev) => {
+                    if (prev[stat.key] === nextValue) {
+                        return prev;
+                    }
+
+                    return { ...prev, [stat.key]: nextValue };
+                });
+
+                if (progress < 1) {
+                    const id = window.requestAnimationFrame(animate);
+                    animationFrameIds.push(id);
+                }
+            };
+
+            const id = window.requestAnimationFrame(animate);
+            animationFrameIds.push(id);
+        });
+
+        return () => {
+            animationFrameIds.forEach((id) => window.cancelAnimationFrame(id));
+        };
+    }, [hasStartedCountUp]);
+
+    const formatStatValue = (key: StatKey, value: number, suffix: string) => {
+        if (key === 'doctors') {
+            return `${value.toLocaleString()}${suffix}`;
+        }
+
+        return `${value}${suffix}`;
+    };
+
     return (
         <main className="relative min-h-[calc(100vh-64px)] overflow-hidden bg-slate-950 px-4 py-14 sm:px-8">
             {/* Animated background blobs */}
@@ -107,8 +198,8 @@ const Page = () => {
                 {/* Typing animation text */}
                 <div className="mt-4 min-h-16 mb-3">
                     <p className="text-lg font-medium sm:text-xl animate-color-shift" style={{ fontFamily: '"Lucida Sans", "Gill Sans", sans-serif' }}>
-                        <span className="text-transparent bg-linear-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text">{displayedText}</span>
-                        <span className="ml-1 inline-block h-6 w-0.5 animate-cursor bg-linear-to-b from-cyan-400 to-blue-500 align-middle" />
+                        <span className="text-cyan-100 drop-shadow-[0_0_14px_rgba(34,211,238,0.55)]">{displayedText}</span>
+                        <span className="ml-1 inline-block h-6 w-0.5 animate-cursor bg-linear-to-b from-cyan-200 to-white align-middle" />
                     </p>
                 </div>
 
@@ -166,31 +257,16 @@ const Page = () => {
                 </div>
 
                 {/* Quick Stats Section */}
-                <div className="mt-16">
+                <div ref={statsSectionRef} className="mt-16">
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        {/* Stat Card 1 */}
-                        <div className="rounded-lg border border-white/10 bg-white/5 p-5 text-center animate-fade-in-delayed delay-300">
-                            <p className="text-3xl font-bold text-cyan-400">500+</p>
-                            <p className="text-sm text-slate-300 mt-2">Hospitals</p>
-                        </div>
-
-                        {/* Stat Card 2 */}
-                        <div className="rounded-lg border border-white/10 bg-white/5 p-5 text-center animate-fade-in-delayed delay-300">
-                            <p className="text-3xl font-bold text-cyan-400">2000+</p>
-                            <p className="text-sm text-slate-300 mt-2">Doctors</p>
-                        </div>
-
-                        {/* Stat Card 3 */}
-                        <div className="rounded-lg border border-white/10 bg-white/5 p-5 text-center animate-fade-in-delayed delay-300">
-                            <p className="text-3xl font-bold text-cyan-400">50K+</p>
-                            <p className="text-sm text-slate-300 mt-2">Happy Patients</p>
-                        </div>
-
-                        {/* Stat Card 4 */}
-                        <div className="rounded-lg border border-white/10 bg-white/5 p-5 text-center animate-fade-in-delayed delay-300">
-                            <p className="text-3xl font-bold text-cyan-400">24/7</p>
-                            <p className="text-sm text-slate-300 mt-2">Support</p>
-                        </div>
+                        {statConfigs.map((stat) => (
+                            <div key={stat.key} className="rounded-lg border border-white/10 bg-white/5 p-5 text-center animate-fade-in-delayed delay-300">
+                                <p className="text-3xl font-bold text-cyan-400">
+                                    {formatStatValue(stat.key, animatedStats[stat.key], stat.suffix)}
+                                </p>
+                                <p className="text-sm text-slate-300 mt-2">{stat.label}</p>
+                            </div>
+                        ))}
                     </div>
                 </div>
 
