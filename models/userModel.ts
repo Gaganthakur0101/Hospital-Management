@@ -1,5 +1,6 @@
 import Mongoose from "mongoose";
 import bcrypt from "bcryptjs";
+import { array } from "zod";
 
 const userSchema = new Mongoose.Schema({
     name: {
@@ -18,9 +19,11 @@ const userSchema = new Mongoose.Schema({
         enum: ["doctor", "patient"],
         default: "patient",
     },
-    location: {
+    City: {
         type: String,
-        required: true,
+    },
+    State: {
+        type: String,
     },
     forgotPasswordToken: String,
     forgotPasswordExpiry: Date,

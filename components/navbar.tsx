@@ -126,10 +126,10 @@ const Navbar = () => {
                                     Near Hospitals
                                 </Link>
                                 <Link 
-                                    href="/contact" 
+                                    href="/appointments" 
                                     className="rounded-lg px-3 py-2 text-sm font-semibold text-slate-200 transition-all duration-200 hover:bg-white/10 hover:text-cyan-200"
                                 >
-                                    Contact
+                                    Appointments
                                 </Link>
                             </>
                         )}

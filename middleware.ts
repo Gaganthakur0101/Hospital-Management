@@ -4,18 +4,17 @@ const publicRoutes = new Set(["/", "/login", "/signup", "/hospitalList"]);
 
 export default function middleware(request: NextRequest) {
     const path = request.nextUrl.pathname;
+    const token = request.cookies.get("token")?.value;
 
-    if (publicRoutes.has(path)) {
+    if (publicRoutes.has(path) && !token) {
         return NextResponse.next();
     }
 
-    const token = request.cookies.get("token")?.value;
-
-    if(publicRoutes.has(path) && token) {
+    if ((path === "/login" || path === "/signup") && token) {
         return NextResponse.redirect(new URL("/", request.url));
     }
 
-    if (!token) {
+    if (!publicRoutes.has(path) && !token) {
         return NextResponse.redirect(new URL("/login", request.url));
     }
 
