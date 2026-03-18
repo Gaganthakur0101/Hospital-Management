@@ -1,10 +1,34 @@
-import {NextRequest , NextResponse} from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import doctor from "@/models/doctorModel";
+import { connect } from "@/lib/dbconfig";
+
+export async function GET(
+    request: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
+) {
+    await connect();
+
+    try {
+        const { id } = await params;
+        const doctorData = await doctor.findById(id);
+
+        if (!doctorData) {
+            return NextResponse.json({ message: "Doctor not found" }, { status: 404 });
+        }
+
+        return NextResponse.json(doctorData, { status: 200 });
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : "Something went wrong";
+        return NextResponse.json({ error: message }, { status: 500 });
+    }
+}
 
 export async function PUT(
     request: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ) {
+    await connect();
+
     try {
         const { id } = await params;
         const doctorData = await doctor.findById(id);
@@ -24,6 +48,8 @@ export async function DELETE(
     request: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ) {
+    await connect();
+
     try {
         const { id } = await params;
         const doctorData = await doctor.findById(id);

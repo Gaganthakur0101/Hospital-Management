@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import DoctorCard from "@/components/doctorCard";
 
 type Doctor = {
     _id: string;
@@ -72,45 +73,18 @@ const Page = () => {
                                     opacity: 0,
                                     animation: `fadeInCard 1s ease-out ${0.2 + index * 0.12}s forwards`,
                                 }}
-                                className="group relative flex flex-col overflow-hidden rounded-2xl border border-white/15 bg-white/8 shadow-xl backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl md:flex-row"
+                                className="opacity-0"
                             >
-                                <div className="relative flex h-44 w-full flex-col justify-center gap-2 border-b border-white/10 bg-slate-900/35 p-4 md:h-auto md:w-52 md:border-b-0 md:border-r">
-                                    <p className="text-sm font-semibold text-cyan-100">Photos</p>
-                                    <p className="text-xs text-slate-300">Reserved for future upload</p>
-                                    <div className="grid grid-cols-2 gap-2">
-                                        {[1, 2, 3, 4].map((slot) => (
-                                            <div
-                                                key={slot}
-                                                className="flex h-14 items-center justify-center rounded-md border border-dashed border-cyan-100/30 bg-slate-900/35 text-[10px] font-medium text-cyan-100/80"
-                                            >
-                                                Slot {slot}
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                <div className="flex flex-1 flex-col justify-between bg-slate-900/30 p-5">
-                                    <div>
-                                        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-                                            <h2 className="text-2xl font-bold text-cyan-100 transition-colors duration-300 group-hover:text-cyan-200">
-                                                {doctor.doctorName}
-                                            </h2>
-                                        </div>
-
-                                        <div className="mb-4 flex flex-wrap gap-2">
-                                            <span className="rounded-full bg-cyan-300/15 px-3 py-1 text-xs font-medium text-cyan-100 transition hover:bg-cyan-300/25">
-                                                {doctor.specialization}
-                                            </span>
-                                        </div>
-
-                                        <div className="grid gap-3 text-sm text-slate-200 sm:grid-cols-2">
-                                            <p><span className="font-semibold text-cyan-100">Experience:</span> {doctor.experience} years</p>
-                                            <p><span className="font-semibold text-cyan-100">Consultation Fees:</span> Rs. {doctor.fees}</p>
-                                            <p><span className="font-semibold text-cyan-100">Phone:</span> {doctor.phone}</p>
-                                            <p><span className="font-semibold text-cyan-100">Email:</span> {doctor.email}</p>
-                                        </div>
-                                    </div>
-                                </div>
+                                <DoctorCard
+                                    id={doctor._id}
+                                    name={doctor.doctorName}
+                                    specialization={doctor.specialization}
+                                    experience={doctor.experience}
+                                    fees={doctor.fees}
+                                    email={doctor.email}
+                                    phone={doctor.phone}
+                                    gender={doctor.gender}
+                                />
                             </div>
                         ))}
                     </div>
