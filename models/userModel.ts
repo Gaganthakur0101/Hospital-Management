@@ -19,10 +19,10 @@ const userSchema = new Mongoose.Schema({
         enum: ["doctor", "patient"],
         default: "patient",
     },
-    City: {
+    city: {
         type: String,
     },
-    State: {
+    state: {
         type: String,
     },
     forgotPasswordToken: String,

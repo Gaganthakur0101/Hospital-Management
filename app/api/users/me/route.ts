@@ -51,6 +51,8 @@ export async function GET(request: NextRequest) {
                     name: user.name,
                     email: user.email,
                     role: user.role,
+                    city: user.city,
+                    state: user.state,
                 },
             },
             { status: 200 }

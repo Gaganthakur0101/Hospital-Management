@@ -6,10 +6,10 @@ export async function POST(request: NextRequest) {
     await connect();
     try {
         const reqBody = await request.json();
-        const { name, email, password, confirmPassword, role } = reqBody;
+        const { name, email, password, confirmPassword, role, state, city } = reqBody;
 
         // Validation
-        if (!name || !email || !password || !confirmPassword || !role) {
+        if (!name || !email || !password || !confirmPassword || !role || !state || !city) {
             return NextResponse.json(
                 { error: "All fields are required" },
                 { status: 400 }
@@ -65,6 +65,8 @@ export async function POST(request: NextRequest) {
             email,
             password,
             role,
+            state,
+            city
         });
 
         await newUser.save();
