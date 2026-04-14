@@ -32,7 +32,6 @@ const Page = () => {
     const [lineIndex, setLineIndex] = useState(0);
     const [displayedText, setDisplayedText] = useState('');
     const [isDeleting, setIsDeleting] = useState(false);
-    const [isLoading, setIsLoading] = useState(true);
     const [hasStartedCountUp, setHasStartedCountUp] = useState(false);
     const [animatedStats, setAnimatedStats] = useState<AnimatedStats>({
         hospitals: 0,
@@ -61,7 +60,6 @@ const Page = () => {
                 console.error('Error fetching user:', error);
                 setUser(null);
             } finally {
-                setIsLoading(false);
             }
         };
 

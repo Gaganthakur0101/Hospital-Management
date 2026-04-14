@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import toast from "react-hot-toast";
 
 interface HospitalData {
@@ -20,6 +21,7 @@ interface HospitalData {
     emergencyAvailable: boolean;
     ambulanceAvailable: boolean;
     specialities: string;
+    avgConsultationMinutes: number;
 }
 
 const Page = () => {
@@ -39,25 +41,37 @@ const Page = () => {
         emergencyAvailable: false,
         ambulanceAvailable: false,
         specialities: "",
+        avgConsultationMinutes: 15,
         images: [],
     });
 
-    const [ownerId] = useState<string | null>(() => {
-        if (typeof window === "undefined") return null;
-        return localStorage.getItem("userId");
-    });
-
-    const [userRole] = useState<string | null>(() => {
-        if (typeof window === "undefined") return null;
-        return localStorage.getItem("userRole");
-    });
+    const [checkingAccess, setCheckingAccess] = useState(true);
 
     useEffect(() => {
-        if (userRole && userRole !== "doctor") {
-            toast.error("Only doctors can register hospitals");
-            router.replace("/profile");
-        }
-    }, [router, userRole]);
+        const validateAccess = async () => {
+            try {
+                const res = await fetch("/api/users/me", { credentials: "include" });
+                if (!res.ok) {
+                    toast.error("Please login first");
+                    router.replace("/login");
+                    return;
+                }
+                const data = await res.json();
+                if (data?.user?.role !== "doctor") {
+                    toast.error("Only doctors can register hospitals");
+                    router.replace(`/profile/${data?.user?.id || ""}`);
+                    return;
+                }
+            } catch {
+                toast.error("Please login first");
+                router.replace("/login");
+            } finally {
+                setCheckingAccess(false);
+            }
+        };
+
+        validateAccess();
+    }, [router]);
 
     const getFriendlyError = (error: unknown): string => {
         if (typeof error === "string" && error.trim().startsWith("[")) {
@@ -124,11 +138,6 @@ const Page = () => {
             return;
         }
 
-        if (!ownerId) {
-            toast.error("Please sign in again");
-            return;
-        }
-
         try {
             const res = await fetch("/api/hospitals/registerHospital", {
                 method: "POST",
@@ -148,7 +157,8 @@ const Page = () => {
                     phoneNumber: hospital.phoneNumber,
                     emergencyAvailable: hospital.emergencyAvailable,
                     ambulanceAvailable: hospital.ambulanceAvailable,
-                    owner: ownerId,
+                    images: hospital.images,
+                    avgConsultationMinutes: hospital.avgConsultationMinutes,
                     specialities: hospital.specialities
                         .split(",")
                         .map((item) => item.trim())
@@ -163,15 +173,60 @@ const Page = () => {
                 toast.error(getFriendlyError(rawError));
             } else {
                 toast.success(data.message);
-                router.push("/hospital/details");
+                router.push("/hospitalList");
             }
         } catch {
             toast.error("Something went wrong");
         }
     };
 
+    const onUploadImages = async (files: FileList | null) => {
+        if (!files || files.length === 0) return;
+
+        const selected = Array.from(files);
+        try {
+            const uploadedUrls = await Promise.all(
+                selected.map(async (file) => {
+                    const formData = new FormData();
+                    formData.append("file", file);
+
+                    const res = await fetch("/api/uploads/hospital-photo", {
+                        method: "POST",
+                        credentials: "include",
+                        body: formData,
+                    });
+                    const data = await res.json();
+
+                    if (!res.ok) {
+                        throw new Error(data?.error || "Upload failed");
+                    }
+
+                    return data.imageUrl as string;
+                })
+            );
+
+            setHospital((prev) => ({
+                ...prev,
+                images: [...prev.images, ...uploadedUrls].slice(0, 6),
+            }));
+            toast.success("Images uploaded");
+        } catch (error: unknown) {
+            toast.error(error instanceof Error ? error.message : "Image upload failed");
+        }
+    };
+
     const inputClass =
         "w-full rounded-xl border border-cyan-100/30 bg-slate-900/70 px-4 py-3 text-slate-100 placeholder:text-slate-400 shadow-sm outline-none transition focus:border-cyan-300/70 focus:ring-4 focus:ring-cyan-300/15";
+
+    if (checkingAccess) {
+        return (
+            <div className="relative min-h-screen overflow-hidden bg-slate-950 px-4 py-10">
+                <div className="mx-auto mt-10 max-w-3xl rounded-2xl border border-white/15 bg-white/8 p-8 text-center text-slate-200 backdrop-blur-xl">
+                    Verifying access...
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="relative min-h-screen overflow-hidden bg-slate-950 px-4 py-10">
@@ -367,6 +422,25 @@ const Page = () => {
                                     />
                                 </div>
                             </div>
+                            <div>
+                                <label htmlFor="avgConsultationMinutes" className="block text-sm font-medium text-slate-200">
+                                    Average consultation minutes *
+                                </label>
+                                <input
+                                    id="avgConsultationMinutes"
+                                    type="number"
+                                    min={5}
+                                    max={120}
+                                    value={hospital.avgConsultationMinutes}
+                                    onChange={(e) =>
+                                        setHospital({
+                                            ...hospital,
+                                            avgConsultationMinutes: Number(e.target.value) || 15,
+                                        })
+                                    }
+                                    className={inputClass}
+                                />
+                            </div>
                         </section>
 
                         <section className="space-y-4">
@@ -428,6 +502,32 @@ const Page = () => {
                                 className={inputClass}
                             />
                             <p className="text-xs text-slate-300">Separate each speciality with a comma.</p>
+                        </section>
+
+                        <section className="space-y-3">
+                            <h2 className="text-lg font-semibold text-white">Hospital photos</h2>
+                            <input
+                                type="file"
+                                accept="image/*"
+                                multiple
+                                onChange={(e) => onUploadImages(e.target.files)}
+                                className="w-full rounded-xl border border-cyan-100/30 bg-slate-900/70 px-4 py-3 text-slate-100"
+                            />
+                            {hospital.images.length > 0 && (
+                                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                                    {hospital.images.map((src, idx) => (
+                                        <div key={`${src}-${idx}`} className="overflow-hidden rounded-lg border border-cyan-100/20">
+                                            <Image
+                                                src={src}
+                                                alt={`hospital-${idx + 1}`}
+                                                width={400}
+                                                height={120}
+                                                className="h-28 w-full object-cover"
+                                            />
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                         </section>
 
                         <div className="flex flex-col gap-4 pt-2 sm:flex-row sm:items-center sm:justify-between">

@@ -19,7 +19,7 @@ interface Hospital {
   emergencyAvailable: boolean;
   ambulanceAvailable: boolean;
   specialities: string[];
-  image: string;
+  images: string[];
 }
 
 const Page = () => {
@@ -94,7 +94,7 @@ const Page = () => {
                   name={hospital.hospitalName}
                   specialities={hospital.specialities}
                   address={`${hospital.address}, ${hospital.city}, ${hospital.state}`}
-                  image={hospital.image}
+                  image={hospital.images?.[0] || ""}
                 />
               </div>
             ))

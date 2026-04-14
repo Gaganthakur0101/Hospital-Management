@@ -25,16 +25,23 @@ const Page = () => {
     const onSignup = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
-        // Create payload in the correct order
-        const payload = {
-            name: user.name,
-            email: user.email,
-            role: user.role,
-            city: user.city,
-            state: user.state,
+        const cleaned = {
+            name: user.name.trim(),
+            email: user.email.trim(),
+            role: user.role.trim(),
+            city: user.city.trim(),
+            state: user.state.trim(),
             password: user.password,
             confirmPassword: user.confirmPassword,
         };
+
+        if (!cleaned.name || !cleaned.email || !cleaned.role || !cleaned.city || !cleaned.state || !cleaned.password || !cleaned.confirmPassword) {
+            toast.error("All fields are required");
+            return;
+        }
+
+        // Create payload in the correct order
+        const payload = cleaned;
 
         try {
             const res = await fetch("/api/users/signup", {

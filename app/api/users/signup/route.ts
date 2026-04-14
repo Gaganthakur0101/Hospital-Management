@@ -1,12 +1,19 @@
 import { connect } from "@/lib/dbconfig";
 import User from "@/models/userModel";
 import { NextRequest, NextResponse } from "next/server";
+import jwt from "jsonwebtoken";
 
 export async function POST(request: NextRequest) {
     await connect();
     try {
         const reqBody = await request.json();
-        const { name, email, password, confirmPassword, role, state, city } = reqBody;
+        const name = String(reqBody?.name || "").trim();
+        const email = String(reqBody?.email || "").trim().toLowerCase();
+        const password = String(reqBody?.password || "");
+        const confirmPassword = String(reqBody?.confirmPassword || "");
+        const role = String(reqBody?.role || "").trim();
+        const state = String(reqBody?.state || "").trim();
+        const city = String(reqBody?.city || "").trim();
 
         // Validation
         if (!name || !email || !password || !confirmPassword || !role || !state || !city) {
@@ -42,24 +49,6 @@ export async function POST(request: NextRequest) {
         }
 
 
-        // Create new user (password will be hashed by the pre-save hook)
-
-        // const salt = await bcrypt.genSalt(10);
-        // const hashedPassword = await bcrypt.hash(password, salt);
-
-        // const newUser = new User({
-        //     name,
-        //     email,
-        //     password : hashedPassword,
-        // });
-
-        // const savedUser = await newUser.save();
-        // console.log("Saved user:", savedUser);
-        // return NextResponse.json(
-        //     { message: "Account created successfully" },
-        //     { status: 201 }
-        // );
-
         const newUser = new User({
             name,
             email,
@@ -76,10 +65,18 @@ export async function POST(request: NextRequest) {
             { status: 201 }
         );
 
-        // Set userId cookie (valid for 7 days)
-        response.cookies.set("userId", newUser._id.toString(), {
+        const generatedToken = jwt.sign(
+            {
+                id: newUser._id.toString(),
+                role: newUser.role,
+            },
+            process.env.JWT_SECRET as string,
+            { expiresIn: "7d" }
+        );
+
+        response.cookies.set("token", generatedToken, {
             httpOnly: true,
-            maxAge: 7 * 24 * 60 * 60, // 7 days in seconds
+            maxAge: 7 * 24 * 60 * 60,
             secure: process.env.NODE_ENV === "production",
             path: "/",
         });

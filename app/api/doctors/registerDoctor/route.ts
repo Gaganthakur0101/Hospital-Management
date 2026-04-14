@@ -120,6 +120,7 @@ export async function POST(request: NextRequest) {
         }
 
         const newDoctor = await doctor.create({
+            user: user._id,
             doctorName,
             gender,
             specialization,

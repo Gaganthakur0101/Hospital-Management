@@ -1,6 +1,7 @@
 "use client";
 import React from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 interface HospitalCardProps {
   id?: string;
@@ -24,11 +25,12 @@ const HospitalCard: React.FC<HospitalCardProps> = ({
 
       {/* LEFT - Image */}
       <div className="relative h-40 w-full overflow-hidden md:h-auto md:w-48">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={image}
+        <Image
+          src={image || "https://images.unsplash.com/photo-1538108149393-fbbd81895907?q=80&w=1200&auto=format&fit=crop"}
           alt="Hospital"
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+          fill
+          sizes="(max-width: 768px) 100vw, 192px"
+          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
         />
         <div className="absolute inset-0 bg-slate-900/15 transition duration-300 group-hover:bg-slate-900/30" />
       </div>
@@ -72,10 +74,10 @@ const HospitalCard: React.FC<HospitalCardProps> = ({
 
         {/* Book Appointment Button */}
         <button
-          onClick={() => router.push(`/hospital/${id}/book  `)}
+          onClick={() => router.push(`/appointments?hospitalId=${id}`)}
           className="rounded-lg bg-cyan-400 px-4 py-2 font-semibold text-slate-950 transition-all duration-300 hover:scale-105 hover:bg-cyan-300 hover:shadow-lg"
         >
-          Book Appointment
+          Book Hospital
         </button>
 
       </div>

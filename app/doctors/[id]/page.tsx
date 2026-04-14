@@ -150,7 +150,7 @@ const Page = () => {
                         onClick={() => router.push(`/appointments?doctorId=${id}`)}
                         className="w-full rounded-lg bg-cyan-400 px-6 py-3 text-sm font-bold text-slate-950 transition-all duration-300 hover:scale-105 hover:bg-cyan-300 hover:shadow-lg sm:w-60"
                     >
-                        Schedule Visit
+                        Book This Doctor
                     </button>
                 </div>
             </div>

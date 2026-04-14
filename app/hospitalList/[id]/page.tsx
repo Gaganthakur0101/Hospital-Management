@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import Image from "next/image";
 
 type Hospital = {
+    _id: string;
     hospitalName: string;
     phoneNumber: string;
     address: string;
@@ -17,6 +19,7 @@ type Hospital = {
     emergencyAvailable: boolean;
     ambulanceAvailable: boolean;
     specialities: string[];
+    images?: string[];
 };
 
 const Page = () => {
@@ -108,14 +111,16 @@ const Page = () => {
 
                 <div className="animate-fade-in-delayed rounded-2xl border border-white/15 bg-white/8 p-6 shadow-xl backdrop-blur-xl">
                     <h2 className="mb-4 text-lg font-bold text-cyan-100">Photos</h2>
-                    <p className="mb-4 text-sm text-slate-300">Photo gallery section is reserved for future uploads.</p>
-                    <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-                        {[1, 2, 3, 4].map((slot) => (
-                            <div
-                                key={slot}
-                                className="flex h-28 items-center justify-center rounded-lg border border-dashed border-cyan-100/30 bg-slate-900/35 text-xs font-medium text-cyan-100/80"
-                            >
-                                Photo Slot {slot}
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">
+                        {(data.images?.length ? data.images : ["https://images.unsplash.com/photo-1538108149393-fbbd81895907?q=80&w=1200&auto=format&fit=crop"]).map((src, index) => (
+                            <div key={`${src}-${index}`} className="overflow-hidden rounded-xl border border-cyan-100/20 bg-slate-900/30">
+                                <Image
+                                    src={src}
+                                    alt={`${data.hospitalName} ${index + 1}`}
+                                    width={600}
+                                    height={220}
+                                    className="h-36 w-full object-cover"
+                                />
                             </div>
                         ))}
                     </div>
@@ -166,7 +171,7 @@ const Page = () => {
                         onClick={() => router.push(`/appointments?hospitalId=${id}`)}
                         className="w-full max-w-md rounded-lg bg-cyan-400 px-6 py-3 text-sm font-bold text-slate-950 transition-all duration-300 hover:scale-105 hover:bg-cyan-300 hover:shadow-lg md:w-80"
                     >
-                        Book Appointment
+                        Book This Hospital
                     </button>
                 </div>
             </div>

@@ -69,7 +69,7 @@ const DoctorCard: React.FC<DoctorCardProps> = ({
 					onClick={() => router.push(`/appointments?doctorId=${id}`)}
 					className="rounded-lg bg-cyan-400 px-4 py-2 font-semibold text-slate-950 transition-all duration-300 hover:scale-105 hover:bg-cyan-300 hover:shadow-lg"
 				>
-					Schedule Visit
+					Request Appointment
 				</button>
 			</div>
 		</div>

@@ -44,9 +44,13 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
+    const imageList = Array.isArray(body.images)
+      ? body.images.filter((item: unknown): item is string => typeof item === "string" && item.trim().length > 0)
+      : [];
 
     const newHospital = await hospital.create({
       ...body,
+      images: imageList,
       doctor: user._id,
     });
 

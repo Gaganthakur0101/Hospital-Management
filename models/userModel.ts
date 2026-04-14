@@ -1,6 +1,5 @@
 import Mongoose from "mongoose";
 import bcrypt from "bcryptjs";
-import { array } from "zod";
 
 const userSchema = new Mongoose.Schema({
     name: {

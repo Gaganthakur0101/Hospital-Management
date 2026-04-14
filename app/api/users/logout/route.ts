@@ -10,7 +10,6 @@ export async function POST() {
             status: 200,
         });
 
-        // Clear userId cookie
         response.cookies.set("token", "", {
             httpOnly: true,
             maxAge: 0,

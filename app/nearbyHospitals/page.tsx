@@ -18,7 +18,7 @@ interface Hospital {
     emergencyAvailable?: boolean;
     ambulanceAvailable?: boolean;
     specialities: string[];
-    image: string;
+    images?: string[];
 }
 
 interface User {
@@ -34,10 +34,6 @@ const Page = () => {
     const [nearbyHospitals, setNearbyHospitals] = useState<Hospital[]>([]);
     const [loading, setLoading] = useState(true);
     const [userCity, setUserCity] = useState("");
-
-    useEffect(() => {
-        fetchNearbyHospitals();
-    }, []);
 
     const fetchNearbyHospitals = async () => {
         try {
@@ -75,11 +71,18 @@ const Page = () => {
                 toast(`No hospitals found in ${user.city}`, { icon: '🏥' });
             }
 
-        } catch (error) {
+        } catch {
             toast.error("Something went wrong");
             setLoading(false);
         }
     };
+
+    useEffect(() => {
+        const run = async () => {
+            await fetchNearbyHospitals();
+        };
+        run();
+    }, []);
 
     return (
         <div className="relative min-h-screen overflow-hidden bg-slate-950 pb-16 pt-12">
@@ -138,7 +141,7 @@ const Page = () => {
                                     name={hospital.hospitalName}
                                     specialities={hospital.specialities}
                                     address={`${hospital.address}, ${hospital.city}, ${hospital.state} - ${hospital.pincode}`}
-                                    image={hospital.image}
+                                    image={hospital.images?.[0] || ""}
                                 />
                             </div>
                         ))
@@ -147,7 +150,7 @@ const Page = () => {
                             <div className="mb-4 text-6xl">🏥</div>
                             <h3 className="mb-2 text-2xl font-bold text-white">No Hospitals Found</h3>
                             <p className="text-slate-300">
-                                We couldn't find any hospitals in <span className="font-semibold text-cyan-400">{userCity}</span>.
+                                We could not find any hospitals in <span className="font-semibold text-cyan-400">{userCity}</span>.
                             </p>
                             <p className="mt-2 text-sm text-slate-400">
                                 Try browsing all available hospitals or contact support for assistance.

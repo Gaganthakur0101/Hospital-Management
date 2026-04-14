@@ -55,7 +55,7 @@ export const MobileMenu = ({ user, onClose }: MobileMenuProps) => {
                             Contact
                         </Link>
                         <Link
-                            href={`/profile/${user.id}`}
+                            href="/appointments"
                             className="block rounded-lg border border-cyan-200/30 bg-cyan-400/10 px-3 py-2 text-base font-semibold text-cyan-100 transition-colors hover:bg-cyan-300/20"
                             onClick={onClose}
                         >

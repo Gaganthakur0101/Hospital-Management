@@ -65,6 +65,16 @@ const hospitalSchema = new mongoose.Schema(
       type: [String],
       required: true,
     },
+    images: {
+      type: [String],
+      default: [],
+    },
+    avgConsultationMinutes: {
+      type: Number,
+      default: 15,
+      min: 5,
+      max: 120,
+    },
 
     doctor: {
       type: mongoose.Schema.Types.ObjectId,
