@@ -4,6 +4,13 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 
+interface ScheduleEntry {
+    specialization: string;
+    days: string[];
+    startTime: string;
+    endTime: string;
+}
+
 type Hospital = {
     _id: string;
     hospitalName: string;
@@ -19,8 +26,20 @@ type Hospital = {
     emergencyAvailable: boolean;
     ambulanceAvailable: boolean;
     specialities: string[];
+    doctorSchedules?: ScheduleEntry[];
     images?: string[];
+    avgConsultationMinutes?: number;
 };
+
+/** Format "14:00" → "2:00 PM" */
+function formatTime(t: string): string {
+    if (!t) return "";
+    const [h, m] = t.split(":").map(Number);
+    if (isNaN(h)) return t;
+    const period = h >= 12 ? "PM" : "AM";
+    const hour = h % 12 || 12;
+    return `${hour}:${String(m).padStart(2, "0")} ${period}`;
+}
 
 const Page = () => {
     const router = useRouter();
@@ -33,16 +52,11 @@ const Page = () => {
 
     useEffect(() => {
         if (!id) return;
-
         const fetchData = async () => {
-            try {   
+            try {
                 setLoading(true);
                 const response = await fetch(`/api/hospitals/${id}`);
-
-                if (!response.ok) {
-                    throw new Error("Failed to fetch hospital data");
-                }
-
+                if (!response.ok) throw new Error("Failed to fetch hospital data");
                 const hospital = await response.json();
                 setData(hospital);
             } catch (err) {
@@ -51,7 +65,6 @@ const Page = () => {
                 setLoading(false);
             }
         };
-
         fetchData();
     }, [id]);
 
@@ -92,6 +105,9 @@ const Page = () => {
         );
     }
 
+    const schedules = data.doctorSchedules?.filter((s) => s.specialization) ?? [];
+    const currentDay = new Date().toLocaleString("en-US", { weekday: "short" });
+
     return (
         <div className="relative min-h-screen overflow-hidden bg-slate-950 pb-16 pt-12">
             <div className="pointer-events-none absolute inset-0">
@@ -101,18 +117,36 @@ const Page = () => {
             </div>
 
             <div className="relative mx-auto max-w-6xl space-y-6 px-4 sm:px-6 lg:px-8">
+
+                {/* ── Title ── */}
                 <div className="animate-rise-up rounded-2xl border border-white/15 bg-white/8 p-6 shadow-2xl backdrop-blur-xl">
                     <p className="mb-2 text-sm font-semibold uppercase tracking-widest text-cyan-400">Hospital Profile</p>
                     <h1 className="text-3xl font-black text-white sm:text-4xl">{data.hospitalName}</h1>
-                    <p className="mt-3 inline-flex rounded-full border border-cyan-200/30 bg-cyan-300/10 px-3 py-1 text-xs font-semibold text-cyan-100">
-                        {data.hospitalType}
-                    </p>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                        <span className="inline-flex rounded-full border border-cyan-200/30 bg-cyan-300/10 px-3 py-1 text-xs font-semibold text-cyan-100">
+                            {data.hospitalType}
+                        </span>
+                        {data.emergencyAvailable && (
+                            <span className="inline-flex rounded-full border border-red-400/30 bg-red-500/15 px-3 py-1 text-xs font-semibold text-red-200">
+                                🚨 Emergency
+                            </span>
+                        )}
+                        {data.ambulanceAvailable && (
+                            <span className="inline-flex rounded-full border border-yellow-400/30 bg-yellow-500/10 px-3 py-1 text-xs font-semibold text-yellow-200">
+                                🚑 Ambulance
+                            </span>
+                        )}
+                    </div>
                 </div>
 
+                {/* ── Photos ── */}
                 <div className="animate-fade-in-delayed rounded-2xl border border-white/15 bg-white/8 p-6 shadow-xl backdrop-blur-xl">
                     <h2 className="mb-4 text-lg font-bold text-cyan-100">Photos</h2>
                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">
-                        {(data.images?.length ? data.images : ["https://images.unsplash.com/photo-1538108149393-fbbd81895907?q=80&w=1200&auto=format&fit=crop"]).map((src, index) => (
+                        {(data.images?.length
+                            ? data.images
+                            : ["https://images.unsplash.com/photo-1538108149393-fbbd81895907?q=80&w=1200&auto=format&fit=crop"]
+                        ).map((src, index) => (
                             <div key={`${src}-${index}`} className="overflow-hidden rounded-xl border border-cyan-100/20 bg-slate-900/30">
                                 <Image
                                     src={src}
@@ -126,6 +160,7 @@ const Page = () => {
                     </div>
                 </div>
 
+                {/* ── Hospital Information ── */}
                 <div className="animate-fade-in-delayed rounded-2xl border border-white/15 bg-white/8 p-6 shadow-xl backdrop-blur-xl">
                     <h2 className="mb-4 text-lg font-bold text-cyan-100">Hospital Information</h2>
                     <div className="space-y-3 text-sm text-slate-200">
@@ -134,13 +169,15 @@ const Page = () => {
                         <p><span className="font-semibold text-cyan-100">City:</span> {data.city}</p>
                         <p><span className="font-semibold text-cyan-100">Pincode:</span> {data.pincode}</p>
                         <p><span className="font-semibold text-cyan-100">State:</span> {data.state}</p>
-                        <p><span className="font-semibold text-cyan-100">Registration Fees:</span> Rs. {data.registrationFees}</p>
+                        <p><span className="font-semibold text-cyan-100">Registration Fees:</span> ₹{data.registrationFees.toLocaleString("en-IN")}</p>
                         <p><span className="font-semibold text-cyan-100">Established Year:</span> {data.establishedYear ?? "Not specified"}</p>
-                        <p><span className="font-semibold text-cyan-100">Emergency Available:</span> {data.emergencyAvailable ? "Yes" : "No"}</p>
-                        <p><span className="font-semibold text-cyan-100">Ambulance Available:</span> {data.ambulanceAvailable ? "Yes" : "No"}</p>
+                        {data.avgConsultationMinutes && (
+                            <p><span className="font-semibold text-cyan-100">Avg. Consultation:</span> {data.avgConsultationMinutes} minutes</p>
+                        )}
                     </div>
                 </div>
 
+                {/* ── Description ── */}
                 <div className="animate-fade-in-delayed rounded-2xl border border-white/15 bg-white/8 p-6 shadow-xl backdrop-blur-xl">
                     <h2 className="mb-4 text-lg font-bold text-cyan-100">Description</h2>
                     <p className="text-sm leading-7 text-slate-200">
@@ -148,9 +185,68 @@ const Page = () => {
                     </p>
                 </div>
 
-                <div className="animate-fade-in-delayed rounded-2xl border border-white/15 bg-white/8 p-6 shadow-xl backdrop-blur-xl">
-                    <h2 className="mb-4 text-lg font-bold text-cyan-100">Specialities</h2>
-                    {data.specialities?.length ? (
+                {/* ── Doctor Availability Schedule ── */}
+                {schedules.length > 0 ? (
+                    <div className="animate-fade-in-delayed rounded-2xl border border-white/15 bg-white/8 p-6 shadow-xl backdrop-blur-xl">
+                        <h2 className="mb-5 text-lg font-bold text-cyan-100">Doctor Availability</h2>
+                        <div className="space-y-3">
+                            {schedules.map((s, idx) => {
+                                const isAvailableToday = s.days.includes(currentDay);
+                                return (
+                                <div
+                                    key={idx}
+                                    className={`flex flex-col gap-2 rounded-xl border px-5 py-4 sm:flex-row sm:items-center sm:justify-between transition ${
+                                        isAvailableToday
+                                            ? "border-emerald-500/40 bg-emerald-500/5 shadow-[0_0_15px_rgba(16,185,129,0.05)]"
+                                            : "border-cyan-100/15 bg-slate-900/50"
+                                    }`}
+                                >
+                                    {/* Specialization label */}
+                                    <span className="inline-flex items-center gap-2 text-sm font-bold text-white">
+                                        <span className={`h-2 w-2 rounded-full flex-shrink-0 ${isAvailableToday ? "bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]" : "bg-cyan-400"}`} />
+                                        {s.specialization}
+                                        {isAvailableToday && (
+                                            <span className="ml-1 rounded bg-emerald-500/20 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-300">
+                                                Available Today
+                                            </span>
+                                        )}
+                                    </span>
+
+                                    {/* Days */}
+                                    <div className="flex flex-wrap gap-1.5 sm:justify-center">
+                                        {s.days.length > 0 ? (
+                                            s.days.map((d) => (
+                                                <span
+                                                    key={d}
+                                                    className={`rounded-full border px-2.5 py-0.5 text-xs font-medium ${
+                                                        d === currentDay
+                                                            ? "border-emerald-400/50 bg-emerald-400/20 text-emerald-200 shadow-sm"
+                                                            : "border-cyan-300/20 bg-cyan-300/10 text-cyan-200"
+                                                    }`}
+                                                >
+                                                    {d}
+                                                </span>
+                                            ))
+                                        ) : (
+                                            <span className="text-xs text-slate-500">Days not specified</span>
+                                        )}
+                                    </div>
+
+                                    {/* Time range */}
+                                    <span className={`text-sm font-medium whitespace-nowrap ${isAvailableToday ? "text-emerald-200" : "text-slate-300"}`}>
+                                        {s.startTime && s.endTime
+                                            ? `${formatTime(s.startTime)} – ${formatTime(s.endTime)}`
+                                            : "Timings not specified"}
+                                    </span>
+                                </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                ) : data.specialities?.length > 0 ? (
+                    /* ── Fallback: flat specialities ── */
+                    <div className="animate-fade-in-delayed rounded-2xl border border-white/15 bg-white/8 p-6 shadow-xl backdrop-blur-xl">
+                        <h2 className="mb-4 text-lg font-bold text-cyan-100">Specialities</h2>
                         <div className="flex flex-wrap gap-2">
                             {data.specialities.map((item, index) => (
                                 <span
@@ -161,11 +257,15 @@ const Page = () => {
                                 </span>
                             ))}
                         </div>
-                    ) : (
+                    </div>
+                ) : (
+                    <div className="animate-fade-in-delayed rounded-2xl border border-white/15 bg-white/8 p-6 shadow-xl backdrop-blur-xl">
+                        <h2 className="mb-4 text-lg font-bold text-cyan-100">Specialities</h2>
                         <p className="text-sm text-slate-300">No specialities listed.</p>
-                    )}
-                </div>
+                    </div>
+                )}
 
+                {/* ── Book button ── */}
                 <div className="animate-fade-in-delayed flex justify-center pb-2">
                     <button
                         onClick={() => router.push(`/appointments?hospitalId=${id}`)}
@@ -175,7 +275,6 @@ const Page = () => {
                     </button>
                 </div>
             </div>
-
         </div>
     );
 };

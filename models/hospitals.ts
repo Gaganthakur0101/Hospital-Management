@@ -63,7 +63,19 @@ const hospitalSchema = new mongoose.Schema(
 
     specialities: {
       type: [String],
-      required: true,
+      default: [],
+    },
+
+    doctorSchedules: {
+      type: [
+        {
+          specialization: { type: String, required: true },
+          days: { type: [String], default: [] },
+          startTime: { type: String, default: "" },
+          endTime: { type: String, default: "" },
+        },
+      ],
+      default: [],
     },
     images: {
       type: [String],

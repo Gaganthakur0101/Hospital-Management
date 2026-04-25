@@ -9,6 +9,13 @@ type AuthTokenPayload = jwt.JwtPayload & {
   role?: string;
 };
 
+interface ScheduleEntry {
+  specialization: string;
+  days: string[];
+  startTime: string;
+  endTime: string;
+}
+
 export async function POST(request: NextRequest) {
   await connect();
 
@@ -44,13 +51,42 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
+
     const imageList = Array.isArray(body.images)
-      ? body.images.filter((item: unknown): item is string => typeof item === "string" && item.trim().length > 0)
+      ? body.images.filter(
+          (item: unknown): item is string =>
+            typeof item === "string" && item.trim().length > 0
+        )
       : [];
+
+    // Accept doctorSchedules array; derive specialities from schedule names
+    const doctorSchedules: ScheduleEntry[] = Array.isArray(body.doctorSchedules)
+      ? body.doctorSchedules.filter(
+          (s: unknown): s is ScheduleEntry =>
+            typeof s === "object" &&
+            s !== null &&
+            typeof (s as ScheduleEntry).specialization === "string" &&
+            (s as ScheduleEntry).specialization.trim().length > 0
+        )
+      : [];
+
+    // Derive flat specialities list from schedule for backward compat
+    const derivedSpecialities = doctorSchedules.length > 0
+      ? [...new Set(doctorSchedules.map((s) => s.specialization.trim()))]
+      : Array.isArray(body.specialities)
+        ? body.specialities
+        : typeof body.specialities === "string"
+          ? body.specialities
+              .split(",")
+              .map((s: string) => s.trim())
+              .filter(Boolean)
+          : [];
 
     const newHospital = await hospital.create({
       ...body,
       images: imageList,
+      doctorSchedules,
+      specialities: derivedSpecialities,
       doctor: user._id,
     });
 
@@ -59,10 +95,8 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Something went wrong";
-    return NextResponse.json(
-      { error: message },
-      { status: 500 }
-    );
+    const message =
+      error instanceof Error ? error.message : "Something went wrong";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

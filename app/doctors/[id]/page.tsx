@@ -3,6 +3,21 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 
+type ScheduleEntry = {
+    specialization: string;
+    days: string[];
+    startTime: string;
+    endTime: string;
+};
+
+type Hospital = {
+    _id: string;
+    hospitalName: string;
+    city: string;
+    state: string;
+    doctorSchedules: ScheduleEntry[];
+};
+
 type Doctor = {
     _id: string;
     doctorName: string;
@@ -13,6 +28,16 @@ type Doctor = {
     email: string;
     phone: string;
     medicalLicenseNumber: string;
+    hospitals?: Hospital[];
+};
+
+const formatTime = (time24: string) => {
+    if (!time24) return "";
+    const [h, m] = time24.split(":");
+    const hours = parseInt(h, 10);
+    const ampm = hours >= 12 ? "PM" : "AM";
+    const hr12 = hours % 12 || 12;
+    return `${hr12}:${m} ${ampm}`;
 };
 
 const Page = () => {
@@ -130,6 +155,82 @@ const Page = () => {
                         </div>
                     </div>
                 </div>
+
+                {doctor.hospitals && doctor.hospitals.length > 0 && (
+                    <div className="animate-fade-in-delayed rounded-2xl border border-white/15 bg-white/8 p-6 shadow-xl backdrop-blur-xl">
+                        <h2 className="mb-5 text-lg font-bold text-cyan-100">Hospital Affiliations & Timings</h2>
+                        <div className="space-y-4">
+                            {doctor.hospitals.map((hospital) => {
+                                const schedules = hospital.doctorSchedules?.filter((s) => s.specialization === doctor.specialization) ?? [];
+                                const currentDay = new Date().toLocaleString("en-US", { weekday: "short" });
+
+                                // if there are no schedules matching the doctor's specialization, we just show all schedules
+                                const displaySchedules = schedules.length > 0 ? schedules : (hospital.doctorSchedules ?? []);
+
+                                return (
+                                    <div key={hospital._id} className="rounded-xl border border-cyan-100/15 bg-slate-900/40 p-4">
+                                        <h3 className="text-md font-bold text-white mb-1">{hospital.hospitalName}</h3>
+                                        <p className="text-xs text-slate-400 mb-3">{hospital.city}, {hospital.state}</p>
+                                        
+                                        <div className="space-y-2">
+                                            {displaySchedules.map((s, idx) => {
+                                                const isAvailableToday = s.days.includes(currentDay);
+                                                return (
+                                                    <div
+                                                        key={idx}
+                                                        className={`flex flex-col gap-2 rounded-lg border px-4 py-3 sm:flex-row sm:items-center sm:justify-between transition ${
+                                                            isAvailableToday
+                                                                ? "border-emerald-500/40 bg-emerald-500/5 shadow-[0_0_15px_rgba(16,185,129,0.05)]"
+                                                                : "border-cyan-100/10 bg-slate-900/60"
+                                                        }`}
+                                                    >
+                                                        <span className="inline-flex items-center gap-2 text-sm font-bold text-white">
+                                                            <span className={`h-2 w-2 rounded-full flex-shrink-0 ${isAvailableToday ? "bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]" : "bg-cyan-400"}`} />
+                                                            {s.specialization}
+                                                            {isAvailableToday && (
+                                                                <span className="ml-1 rounded bg-emerald-500/20 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-300">
+                                                                    Available Today
+                                                                </span>
+                                                            )}
+                                                        </span>
+
+                                                        <div className="flex flex-wrap gap-1.5 sm:justify-center">
+                                                            {s.days.length > 0 ? (
+                                                                s.days.map((d) => (
+                                                                    <span
+                                                                        key={d}
+                                                                        className={`rounded-full border px-2.5 py-0.5 text-[10px] font-medium ${
+                                                                            d === currentDay
+                                                                                ? "border-emerald-400/50 bg-emerald-400/20 text-emerald-200 shadow-sm"
+                                                                                : "border-cyan-300/20 bg-cyan-300/10 text-cyan-200"
+                                                                        }`}
+                                                                    >
+                                                                        {d}
+                                                                    </span>
+                                                                ))
+                                                            ) : (
+                                                                <span className="text-[10px] text-slate-500">Days not specified</span>
+                                                            )}
+                                                        </div>
+
+                                                        <span className={`text-xs font-medium whitespace-nowrap ${isAvailableToday ? "text-emerald-200" : "text-slate-300"}`}>
+                                                            {s.startTime && s.endTime
+                                                                ? `${formatTime(s.startTime)} – ${formatTime(s.endTime)}`
+                                                                : "Timings not specified"}
+                                                        </span>
+                                                    </div>
+                                                );
+                                            })}
+                                            {displaySchedules.length === 0 && (
+                                                <p className="text-xs text-slate-500 italic">No schedules listed for this hospital.</p>
+                                            )}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                )}
 
                 <div className="animate-fade-in-delayed rounded-2xl border border-white/15 bg-white/8 p-6 shadow-xl backdrop-blur-xl">
                     <h2 className="mb-4 text-lg font-bold text-cyan-100">Contact Information</h2>

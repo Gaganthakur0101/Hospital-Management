@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import doctor from "@/models/doctorModel";
+import hospital from "@/models/hospitals"; // Import hospital model
 import { connect } from "@/lib/dbconfig";
 
 export async function GET(
@@ -10,13 +11,19 @@ export async function GET(
 
     try {
         const { id } = await params;
-        const doctorData = await doctor.findById(id);
+        const doctorData = await doctor.findById(id).lean();
 
         if (!doctorData) {
             return NextResponse.json({ message: "Doctor not found" }, { status: 404 });
         }
 
-        return NextResponse.json(doctorData, { status: 200 });
+        // Fetch hospitals associated with this doctor's user ID
+        let hospitals: any[] = [];
+        if (doctorData.user) {
+            hospitals = await hospital.find({ doctor: doctorData.user }).lean();
+        }
+
+        return NextResponse.json({ ...doctorData, hospitals }, { status: 200 });
     } catch (error: unknown) {
         const message = error instanceof Error ? error.message : "Something went wrong";
         return NextResponse.json({ error: message }, { status: 500 });

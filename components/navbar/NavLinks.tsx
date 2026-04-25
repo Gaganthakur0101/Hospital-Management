@@ -47,6 +47,14 @@ export const NavLinks = ({ user }: NavLinksProps) => {
                     >
                         Appointments
                     </Link>
+                    {user.role === 'doctor' && (
+                        <Link
+                            href="/doctors/manage-hospitals"
+                            className="rounded-lg border border-cyan-400/30 bg-cyan-400/10 px-3 py-2 text-sm font-semibold text-cyan-200 transition-all duration-200 hover:bg-cyan-400/20 hover:text-cyan-100"
+                        >
+                            My Hospitals
+                        </Link>
+                    )}
                 </>
             )}
         </div>

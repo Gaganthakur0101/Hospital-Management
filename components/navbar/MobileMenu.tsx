@@ -66,7 +66,14 @@ export const MobileMenu = ({ user, onClose }: MobileMenuProps) => {
                 
                 {user && user.role === 'doctor' && (
                     <div className="space-y-1 pt-1">
-                        <p className="px-3 text-xs font-semibold uppercase tracking-wider text-emerald-300">Register</p>
+                        <p className="px-3 text-xs font-semibold uppercase tracking-wider text-emerald-300">Doctor Tools</p>
+                        <Link
+                            href="/doctors/manage-hospitals"
+                            className="block rounded-lg border border-cyan-400/30 bg-cyan-400/10 px-3 py-2 text-base font-semibold text-cyan-100 transition-colors hover:bg-cyan-300/20"
+                            onClick={onClose}
+                        >
+                            My Hospitals
+                        </Link>
                         <Link
                             href="/register/registerHospital"
                             className="block rounded-lg bg-emerald-400 px-3 py-2 text-base font-bold text-slate-950 transition-colors hover:bg-emerald-300"

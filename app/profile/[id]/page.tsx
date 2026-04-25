@@ -291,6 +291,26 @@ const Page = () => {
                     </div>
                 </div>
 
+                {/* Manage Hospitals card — doctors only */}
+                {user?.role === 'doctor' && (
+                    <div className="mt-8 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-8 backdrop-blur-sm animate-fade-in-delayed delay-300">
+                        <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+                            <div>
+                                <h3 className="text-xl font-bold text-white">Hospital Management</h3>
+                                <p className="mt-1 text-sm text-slate-300">
+                                    View, edit, and manage all hospitals registered under your account.
+                                </p>
+                            </div>
+                            <Link
+                                href="/doctors/manage-hospitals"
+                                className="inline-flex items-center gap-2 rounded-xl bg-emerald-400 px-6 py-3 text-sm font-bold text-slate-950 transition hover:scale-[1.02] hover:bg-emerald-300 whitespace-nowrap"
+                            >
+                                🏥 My Hospitals
+                            </Link>
+                        </div>
+                    </div>
+                )}
+
             </section>
         </main>
     );

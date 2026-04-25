@@ -1,8 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import toast from "react-hot-toast";
 import StateCitySelector from "@/components/StateCitySelector";
@@ -16,7 +15,7 @@ interface ScheduleEntry {
     endTime: string;
 }
 
-interface HospitalData {
+interface HospitalForm {
     hospitalName: string;
     phoneNumber: string;
     address: string;
@@ -74,45 +73,32 @@ const ScheduleBuilder = ({
     return (
         <div className="space-y-4">
             {schedules.map((entry, idx) => (
-                <div
-                    key={idx}
-                    className="rounded-xl border border-cyan-100/15 bg-slate-900/50 p-4 space-y-3 relative"
-                >
-                    {/* Remove button */}
+                <div key={idx} className="rounded-xl border border-cyan-100/15 bg-slate-900/50 p-4 space-y-3 relative">
                     <button
                         type="button"
                         onClick={() => removeRow(idx)}
                         className="absolute top-3 right-3 flex items-center justify-center w-6 h-6 rounded-full bg-red-500/20 text-red-300 hover:bg-red-500/40 transition text-xs font-bold"
-                        aria-label="Remove"
                     >
                         ✕
                     </button>
 
-                    {/* Specialization name */}
                     <div>
-                        <label className="block text-xs font-medium text-slate-400 mb-1">
-                            Specialization *
-                        </label>
+                        <label className="block text-xs font-medium text-slate-400 mb-1">Specialization *</label>
                         <input
                             type="text"
-                            list={`spec-list-${idx}`}
+                            list={`spec-list-edit-${idx}`}
                             placeholder="e.g. Cardiology"
                             value={entry.specialization}
                             onChange={(e) => updateRow(idx, { specialization: e.target.value })}
                             className={inputCls}
                         />
-                        <datalist id={`spec-list-${idx}`}>
-                            {SPECIALIZATION_SUGGESTIONS.map((s) => (
-                                <option key={s} value={s} />
-                            ))}
+                        <datalist id={`spec-list-edit-${idx}`}>
+                            {SPECIALIZATION_SUGGESTIONS.map((s) => <option key={s} value={s} />)}
                         </datalist>
                     </div>
 
-                    {/* Day checkboxes */}
                     <div>
-                        <label className="block text-xs font-medium text-slate-400 mb-2">
-                            Available Days
-                        </label>
+                        <label className="block text-xs font-medium text-slate-400 mb-2">Available Days</label>
                         <div className="flex flex-wrap gap-2">
                             {ALL_DAYS.map((day) => {
                                 const selected = entry.days.includes(day);
@@ -121,11 +107,10 @@ const ScheduleBuilder = ({
                                         key={day}
                                         type="button"
                                         onClick={() => toggleDay(idx, day)}
-                                        className={`px-3 py-1 rounded-full text-xs font-semibold border transition ${
-                                            selected
-                                                ? "bg-cyan-400/25 border-cyan-400/60 text-cyan-200"
-                                                : "border-slate-600 text-slate-400 hover:border-slate-400"
-                                        }`}
+                                        className={`px-3 py-1 rounded-full text-xs font-semibold border transition ${selected
+                                            ? "bg-cyan-400/25 border-cyan-400/60 text-cyan-200"
+                                            : "border-slate-600 text-slate-400 hover:border-slate-400"
+                                            }`}
                                     >
                                         {day}
                                     </button>
@@ -134,12 +119,9 @@ const ScheduleBuilder = ({
                         </div>
                     </div>
 
-                    {/* Time range */}
                     <div className="grid grid-cols-2 gap-3">
                         <div>
-                            <label className="block text-xs font-medium text-slate-400 mb-1">
-                                Start Time
-                            </label>
+                            <label className="block text-xs font-medium text-slate-400 mb-1">Start Time</label>
                             <input
                                 type="time"
                                 value={entry.startTime}
@@ -148,9 +130,7 @@ const ScheduleBuilder = ({
                             />
                         </div>
                         <div>
-                            <label className="block text-xs font-medium text-slate-400 mb-1">
-                                End Time
-                            </label>
+                            <label className="block text-xs font-medium text-slate-400 mb-1">End Time</label>
                             <input
                                 type="time"
                                 value={entry.endTime}
@@ -173,12 +153,14 @@ const ScheduleBuilder = ({
     );
 };
 
-// ─── Main Page ────────────────────────────────────────────────────────────────
+// ─── Main Edit Page ───────────────────────────────────────────────────────────
 
 const Page = () => {
     const router = useRouter();
+    const params = useParams<{ id: string }>();
+    const id = params?.id;
 
-    const [hospital, setHospital] = useState<HospitalData>({
+    const [form, setForm] = useState<HospitalForm>({
         hospitalName: "",
         phoneNumber: "",
         address: "",
@@ -189,50 +171,86 @@ const Page = () => {
         hospitalType: "Private",
         description: "",
         establishedYear: new Date().getFullYear(),
+        images: [],
         emergencyAvailable: false,
         ambulanceAvailable: false,
         avgConsultationMinutes: 15,
-        images: [],
     });
 
     const [schedules, setSchedules] = useState<ScheduleEntry[]>([]);
-    const [checkingAccess, setCheckingAccess] = useState(true);
+    const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
 
     useEffect(() => {
-        const validateAccess = async () => {
+        if (!id) return;
+
+        const fetchHospital = async () => {
             try {
-                const res = await fetch("/api/users/me", { credentials: "include" });
-                if (!res.ok) {
-                    toast.error("Please login first");
-                    router.replace("/login");
+                // Auth check
+                const meRes = await fetch("/api/users/me", { credentials: "include" });
+                if (!meRes.ok) { router.replace("/login"); return; }
+                const meData = await meRes.json();
+                if (meData?.user?.role !== "doctor") {
+                    toast.error("Only doctors can edit hospitals");
+                    router.replace(`/profile/${meData?.user?.id || ""}`);
                     return;
                 }
+
+                // Fetch hospital
+                const res = await fetch(`/api/hospitals/${id}`);
+                if (!res.ok) throw new Error("Hospital not found");
                 const data = await res.json();
-                if (data?.user?.role !== "doctor") {
-                    toast.error("Only doctors can register hospitals");
-                    router.replace(`/profile/${data?.user?.id || ""}`);
-                    return;
+
+                setForm({
+                    hospitalName: data.hospitalName ?? "",
+                    phoneNumber: data.phoneNumber ?? "",
+                    address: data.address ?? "",
+                    city: data.city ?? "",
+                    pincode: data.pincode ?? "",
+                    state: data.state ?? "",
+                    registrationFees: data.registrationFees ?? 0,
+                    hospitalType: data.hospitalType ?? "Private",
+                    description: data.description ?? "",
+                    establishedYear: data.establishedYear ?? new Date().getFullYear(),
+                    images: data.images ?? [],
+                    emergencyAvailable: data.emergencyAvailable ?? false,
+                    ambulanceAvailable: data.ambulanceAvailable ?? false,
+                    avgConsultationMinutes: data.avgConsultationMinutes ?? 15,
+                });
+
+                // Populate schedules — if doctorSchedules exists use it, otherwise build from specialities
+                if (Array.isArray(data.doctorSchedules) && data.doctorSchedules.length > 0) {
+                    setSchedules(data.doctorSchedules);
+                } else if (Array.isArray(data.specialities) && data.specialities.length > 0) {
+                    setSchedules(
+                        data.specialities.map((s: string) => ({
+                            specialization: s,
+                            days: [],
+                            startTime: "",
+                            endTime: "",
+                        }))
+                    );
                 }
-            } catch {
-                toast.error("Please login first");
-                router.replace("/login");
+            } catch (err) {
+                toast.error(err instanceof Error ? err.message : "Failed to load hospital");
             } finally {
-                setCheckingAccess(false);
+                setLoading(false);
             }
         };
-        validateAccess();
-    }, [router]);
+
+        fetchHospital();
+    }, [id, router]);
 
     const handlePincodeChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const pin = e.target.value;
-        setHospital((prev) => ({ ...prev, pincode: pin }));
+        setForm((prev) => ({ ...prev, pincode: pin }));
 
         if (pin.length === 6) {
             try {
                 const res = await fetch(`/api/locations/pincode/${pin}`);
                 if (res.ok) {
                     const data = await res.json();
-                    setHospital((prev) => ({
+                    setForm((prev) => ({
                         ...prev,
                         state: data.state || prev.state,
                         city: data.district || prev.city,
@@ -245,122 +263,11 @@ const Page = () => {
         }
     };
 
-    const getFriendlyError = (error: unknown): string => {
-        if (typeof error === "string" && error.trim().startsWith("[")) {
-            try {
-                const parsed = JSON.parse(error);
-                return getFriendlyError(parsed);
-            } catch {
-                return error;
-            }
-        }
-        if (Array.isArray(error) && error.length > 0) {
-            const labelMap: Record<string, string> = {
-                hospitalName: "Hospital name",
-                phoneNumber: "Phone number",
-                description: "Description",
-                pincode: "Pincode",
-                registrationFees: "Registration fees",
-                establishedYear: "Established year",
-                hospitalType: "Hospital type",
-                address: "Address",
-                city: "City",
-                state: "State",
-            };
-            const messages = (error as Array<{ path?: unknown; message?: string }>).map((issue) => {
-                const field = Array.isArray(issue?.path) ? issue.path[0] : undefined;
-                const label = field ? labelMap[field as string] || "Field" : "Field";
-                return issue?.message || `${label} is invalid`;
-            });
-            return messages.join(" | ");
-        }
-        if (typeof error === "string") return error;
-        return "Registration failed";
-    };
-
-    const onRegister = async (e: React.MouseEvent<HTMLButtonElement>) => {
-        e.preventDefault();
-
-        if (
-            !hospital.hospitalName ||
-            !hospital.phoneNumber ||
-            !hospital.address ||
-            !hospital.city ||
-            !hospital.pincode ||
-            !hospital.state ||
-            !hospital.description
-        ) {
-            toast.error("Please fill in all required fields");
-            return;
-        }
-
-        // Validate schedules
-        for (const s of schedules) {
-            if (!s.specialization.trim()) {
-                toast.error("Each schedule must have a specialization name");
-                return;
-            }
-        }
-
-        // Validate Pincode and State Match
-        try {
-            const pinRes = await fetch(`/api/locations/pincode/${hospital.pincode}`);
-            if (!pinRes.ok) {
-                toast.error("Invalid pincode. Please enter a valid 6-digit pincode.");
-                return;
-            }
-            const pinData = await pinRes.json();
-            if (pinData.state.toLowerCase() !== hospital.state.toLowerCase()) {
-                toast.error(`The pincode ${hospital.pincode} does not belong to ${hospital.state}.`);
-                return;
-            }
-        } catch {
-            // Proceed if the API fails, to prevent blocking saves on API downtime
-        }
-
-        try {
-            const res = await fetch("/api/hospitals/registerHospital", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    hospitalName: hospital.hospitalName,
-                    address: hospital.address,
-                    city: hospital.city,
-                    state: hospital.state,
-                    pincode: hospital.pincode,
-                    registrationFees: hospital.registrationFees,
-                    hospitalType: hospital.hospitalType,
-                    description: hospital.description,
-                    establishedYear: hospital.establishedYear,
-                    phoneNumber: hospital.phoneNumber,
-                    emergencyAvailable: hospital.emergencyAvailable,
-                    ambulanceAvailable: hospital.ambulanceAvailable,
-                    images: hospital.images,
-                    avgConsultationMinutes: hospital.avgConsultationMinutes,
-                    doctorSchedules: schedules,
-                }),
-            });
-
-            const data = await res.json();
-
-            if (!res.ok) {
-                const rawError = data?.error ?? data?.message ?? data;
-                toast.error(getFriendlyError(rawError));
-            } else {
-                toast.success(data.message);
-                router.push("/hospitalList");
-            }
-        } catch {
-            toast.error("Something went wrong");
-        }
-    };
-
     const onUploadImages = async (files: FileList | null) => {
         if (!files || files.length === 0) return;
-        const selected = Array.from(files);
         try {
             const uploadedUrls = await Promise.all(
-                selected.map(async (file) => {
+                Array.from(files).map(async (file) => {
                     const formData = new FormData();
                     formData.append("file", file);
                     const res = await fetch("/api/uploads/hospital-photo", {
@@ -373,24 +280,81 @@ const Page = () => {
                     return data.imageUrl as string;
                 })
             );
-            setHospital((prev) => ({
+            setForm((prev) => ({
                 ...prev,
                 images: [...prev.images, ...uploadedUrls].slice(0, 6),
             }));
             toast.success("Images uploaded");
-        } catch (error: unknown) {
-            toast.error(error instanceof Error ? error.message : "Image upload failed");
+        } catch (err) {
+            toast.error(err instanceof Error ? err.message : "Image upload failed");
+        }
+    };
+
+    const removeImage = (idx: number) => {
+        setForm((prev) => ({
+            ...prev,
+            images: prev.images.filter((_, i) => i !== idx),
+        }));
+    };
+
+    const onSave = async (e: React.MouseEvent<HTMLButtonElement>) => {
+        e.preventDefault();
+
+        if (!form.hospitalName || !form.phoneNumber || !form.address || !form.city || !form.state || !form.description) {
+            toast.error("Please fill in all required fields");
+            return;
+        }
+        for (const s of schedules) {
+            if (!s.specialization.trim()) {
+                toast.error("Each schedule must have a specialization name");
+                return;
+            }
+        }
+
+        // Validate Pincode and State Match
+        try {
+            const pinRes = await fetch(`/api/locations/pincode/${form.pincode}`);
+            if (!pinRes.ok) {
+                toast.error("Invalid pincode. Please enter a valid 6-digit pincode.");
+                return;
+            }
+            const pinData = await pinRes.json();
+            if (pinData.state.toLowerCase() !== form.state.toLowerCase()) {
+                toast.error(`The pincode ${form.pincode} does not belong to ${form.state}.`);
+                return;
+            }
+        } catch {
+            // Proceed if the API fails, to prevent blocking saves on API downtime
+        }
+
+        setSaving(true);
+        try {
+            const res = await fetch(`/api/hospitals/${id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                credentials: "include",
+                body: JSON.stringify({ ...form, doctorSchedules: schedules }),
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data?.error || "Update failed");
+            toast.success("Hospital updated successfully!");
+            router.push("/doctors/manage-hospitals");
+        } catch (err) {
+            toast.error(err instanceof Error ? err.message : "Something went wrong");
+        } finally {
+            setSaving(false);
         }
     };
 
     const inputClass =
         "w-full rounded-xl border border-cyan-100/30 bg-slate-900/70 px-4 py-3 text-slate-100 placeholder:text-slate-400 shadow-sm outline-none transition focus:border-cyan-300/70 focus:ring-4 focus:ring-cyan-300/15";
 
-    if (checkingAccess) {
+    if (loading) {
         return (
-            <div className="relative min-h-screen overflow-hidden bg-slate-950 px-4 py-10">
-                <div className="mx-auto mt-10 max-w-3xl rounded-2xl border border-white/15 bg-white/8 p-8 text-center text-slate-200 backdrop-blur-xl">
-                    Verifying access...
+            <div className="relative min-h-screen bg-slate-950 flex items-center justify-center">
+                <div className="text-center">
+                    <div className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-slate-600 border-t-cyan-400" />
+                    <p className="mt-4 text-slate-300">Loading hospital data...</p>
                 </div>
             </div>
         );
@@ -404,22 +368,24 @@ const Page = () => {
             <div className="mx-auto w-full max-w-3xl">
                 {/* Header */}
                 <div className="mb-8 rounded-3xl border border-white/15 bg-white/8 p-6 shadow-2xl backdrop-blur-xl sm:p-8">
-                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex items-center justify-between">
                         <div>
                             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-200">
-                                Hospital onboarding
+                                Hospital Management
                             </p>
-                            <h1 className="mt-2 text-3xl font-black text-white sm:text-4xl">
-                                Register your hospital
+                            <h1 className="mt-2 text-2xl font-black text-white sm:text-3xl">
+                                Edit Hospital
                             </h1>
-                            <p className="mt-3 max-w-xl text-sm leading-relaxed text-slate-200">
-                                Provide core details and clinical capabilities so patients can find your facility faster.
+                            <p className="mt-2 text-sm text-slate-300 font-medium truncate max-w-xs">
+                                {form.hospitalName}
                             </p>
                         </div>
-                        <div className="rounded-2xl border border-cyan-100/30 bg-cyan-300/10 px-4 py-3 text-sm text-slate-200">
-                            <p className="font-medium text-cyan-100">Need help?</p>
-                            <p>Call our onboarding team.</p>
-                        </div>
+                        <button
+                            onClick={() => router.push("/doctors/manage-hospitals")}
+                            className="rounded-xl border border-white/15 bg-white/5 px-4 py-2 text-sm text-slate-300 hover:bg-white/10 transition"
+                        >
+                            ← Back
+                        </button>
                     </div>
                 </div>
 
@@ -428,49 +394,43 @@ const Page = () => {
 
                         {/* ── Hospital Information ── */}
                         <section className="space-y-4">
-                            <div className="flex items-center justify-between">
-                                <h2 className="text-lg font-semibold text-white">Hospital information</h2>
-                                <span className="rounded-full bg-cyan-300/15 px-3 py-1 text-xs font-medium text-cyan-100">Required</span>
-                            </div>
+                            <h2 className="text-lg font-semibold text-white">Hospital information</h2>
 
                             <div>
-                                <label htmlFor="hospitalName" className="block text-sm font-medium text-slate-200">
+                                <label htmlFor="edit-hospitalName" className="block text-sm font-medium text-slate-200">
                                     Hospital name *
                                 </label>
                                 <input
-                                    id="hospitalName"
+                                    id="edit-hospitalName"
                                     type="text"
-                                    placeholder="e.g. Mercy Multispecialty Hospital"
-                                    value={hospital.hospitalName}
-                                    onChange={(e) => setHospital({ ...hospital, hospitalName: e.target.value })}
+                                    value={form.hospitalName}
+                                    onChange={(e) => setForm({ ...form, hospitalName: e.target.value })}
                                     className={inputClass}
                                 />
                             </div>
 
                             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                 <div>
-                                    <label htmlFor="phoneNumber" className="block text-sm font-medium text-slate-200">
+                                    <label htmlFor="edit-phoneNumber" className="block text-sm font-medium text-slate-200">
                                         Phone number *
                                     </label>
                                     <input
-                                        id="phoneNumber"
+                                        id="edit-phoneNumber"
                                         type="tel"
-                                        placeholder="10-digit phone number"
-                                        value={hospital.phoneNumber}
-                                        onChange={(e) => setHospital({ ...hospital, phoneNumber: e.target.value })}
+                                        value={form.phoneNumber}
+                                        onChange={(e) => setForm({ ...form, phoneNumber: e.target.value })}
                                         className={inputClass}
                                     />
                                 </div>
-
                                 <div>
-                                    <label htmlFor="hospitalType" className="block text-sm font-medium text-slate-200">
+                                    <label htmlFor="edit-hospitalType" className="block text-sm font-medium text-slate-200">
                                         Hospital type *
                                     </label>
                                     <select
-                                        id="hospitalType"
-                                        value={hospital.hospitalType}
+                                        id="edit-hospitalType"
+                                        value={form.hospitalType}
                                         onChange={(e) =>
-                                            setHospital({ ...hospital, hospitalType: e.target.value as HospitalData["hospitalType"] })
+                                            setForm({ ...form, hospitalType: e.target.value as HospitalForm["hospitalType"] })
                                         }
                                         className={inputClass}
                                     >
@@ -487,38 +447,36 @@ const Page = () => {
                             <h2 className="text-lg font-semibold text-white">Location details</h2>
 
                             <div>
-                                <label htmlFor="address" className="block text-sm font-medium text-slate-200">
+                                <label htmlFor="edit-address" className="block text-sm font-medium text-slate-200">
                                     Address *
                                 </label>
                                 <input
-                                    id="address"
+                                    id="edit-address"
                                     type="text"
-                                    placeholder="Street, building, landmark"
-                                    value={hospital.address}
-                                    onChange={(e) => setHospital({ ...hospital, address: e.target.value })}
+                                    value={form.address}
+                                    onChange={(e) => setForm({ ...form, address: e.target.value })}
                                     className={inputClass}
                                 />
                             </div>
 
                             <StateCitySelector
-                                state={hospital.state}
-                                city={hospital.city}
+                                state={form.state}
+                                city={form.city}
                                 onStateChange={(stateName) =>
-                                    setHospital({ ...hospital, state: stateName, city: "" })
+                                    setForm({ ...form, state: stateName, city: "" })
                                 }
-                                onCityChange={(c) => setHospital({ ...hospital, city: c })}
+                                onCityChange={(c) => setForm({ ...form, city: c })}
                                 inputClass={inputClass}
                             />
 
                             <div>
-                                <label htmlFor="pincode" className="block text-sm font-medium text-slate-200">
+                                <label htmlFor="edit-pincode" className="block text-sm font-medium text-slate-200">
                                     Pincode *
                                 </label>
                                 <input
-                                    id="pincode"
+                                    id="edit-pincode"
                                     type="text"
-                                    placeholder="6-digit pincode"
-                                    value={hospital.pincode}
+                                    value={form.pincode}
                                     onChange={handlePincodeChange}
                                     className={inputClass}
                                 />
@@ -531,52 +489,46 @@ const Page = () => {
 
                             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                 <div>
-                                    <label htmlFor="registrationFees" className="block text-sm font-medium text-slate-200">
+                                    <label htmlFor="edit-registrationFees" className="block text-sm font-medium text-slate-200">
                                         Registration fees *
                                     </label>
                                     <input
-                                        id="registrationFees"
+                                        id="edit-registrationFees"
                                         type="number"
                                         min={0}
-                                        placeholder="0"
-                                        value={hospital.registrationFees}
-                                        onChange={(e) =>
-                                            setHospital({ ...hospital, registrationFees: Number(e.target.value) || 0 })
-                                        }
+                                        value={form.registrationFees}
+                                        onChange={(e) => setForm({ ...form, registrationFees: Number(e.target.value) || 0 })}
                                         className={inputClass}
                                     />
                                 </div>
-
                                 <div>
-                                    <label htmlFor="establishedYear" className="block text-sm font-medium text-slate-200">
-                                        Established year *
+                                    <label htmlFor="edit-establishedYear" className="block text-sm font-medium text-slate-200">
+                                        Established year
                                     </label>
                                     <input
-                                        id="establishedYear"
+                                        id="edit-establishedYear"
                                         type="number"
                                         min={1800}
                                         max={new Date().getFullYear()}
-                                        value={hospital.establishedYear}
-                                        onChange={(e) =>
-                                            setHospital({ ...hospital, establishedYear: Number(e.target.value) || 0 })
-                                        }
+                                        value={form.establishedYear}
+                                        onChange={(e) => setForm({ ...form, establishedYear: Number(e.target.value) || 0 })}
                                         className={inputClass}
                                     />
                                 </div>
                             </div>
 
                             <div>
-                                <label htmlFor="avgConsultationMinutes" className="block text-sm font-medium text-slate-200">
-                                    Average consultation minutes *
+                                <label htmlFor="edit-avgConsultationMinutes" className="block text-sm font-medium text-slate-200">
+                                    Average consultation minutes
                                 </label>
                                 <input
-                                    id="avgConsultationMinutes"
+                                    id="edit-avgConsultationMinutes"
                                     type="number"
                                     min={5}
                                     max={120}
-                                    value={hospital.avgConsultationMinutes}
+                                    value={form.avgConsultationMinutes}
                                     onChange={(e) =>
-                                        setHospital({ ...hospital, avgConsultationMinutes: Number(e.target.value) || 15 })
+                                        setForm({ ...form, avgConsultationMinutes: Number(e.target.value) || 15 })
                                     }
                                     className={inputClass}
                                 />
@@ -590,23 +542,18 @@ const Page = () => {
                                 <label className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/8 px-4 py-3 cursor-pointer">
                                     <input
                                         type="checkbox"
-                                        checked={hospital.emergencyAvailable}
-                                        onChange={(e) =>
-                                            setHospital({ ...hospital, emergencyAvailable: e.target.checked })
-                                        }
-                                        className="h-4 w-4 rounded border-slate-300 text-cyan-300 focus:ring-4 focus:ring-cyan-300/20"
+                                        checked={form.emergencyAvailable}
+                                        onChange={(e) => setForm({ ...form, emergencyAvailable: e.target.checked })}
+                                        className="h-4 w-4 rounded text-cyan-300"
                                     />
                                     <span className="text-sm text-slate-100">24/7 emergency available</span>
                                 </label>
-
                                 <label className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/8 px-4 py-3 cursor-pointer">
                                     <input
                                         type="checkbox"
-                                        checked={hospital.ambulanceAvailable}
-                                        onChange={(e) =>
-                                            setHospital({ ...hospital, ambulanceAvailable: e.target.checked })
-                                        }
-                                        className="h-4 w-4 rounded border-slate-300 text-cyan-300 focus:ring-4 focus:ring-cyan-300/20"
+                                        checked={form.ambulanceAvailable}
+                                        onChange={(e) => setForm({ ...form, ambulanceAvailable: e.target.checked })}
+                                        className="h-4 w-4 rounded text-cyan-300"
                                     />
                                     <span className="text-sm text-slate-100">Ambulance available</span>
                                 </label>
@@ -617,27 +564,26 @@ const Page = () => {
                         <section className="space-y-4">
                             <h2 className="text-lg font-semibold text-white">Hospital description *</h2>
                             <textarea
-                                id="description"
+                                id="edit-description"
                                 rows={4}
-                                placeholder="Describe services, departments, and special capabilities"
-                                value={hospital.description}
-                                onChange={(e) => setHospital({ ...hospital, description: e.target.value })}
-                                className={`${inputClass} min-h-30`}
+                                value={form.description}
+                                onChange={(e) => setForm({ ...form, description: e.target.value })}
+                                className={`${inputClass} min-h-[8rem]`}
                             />
                         </section>
 
-                        {/* ── Doctor Schedule Builder ── */}
+                        {/* ── Schedule Builder ── */}
                         <section className="space-y-4">
                             <div>
                                 <h2 className="text-lg font-semibold text-white">Specializations & Availability</h2>
                                 <p className="mt-1 text-xs text-slate-400">
-                                    Add each specialization you offer at this hospital with the days and hours you are available.
+                                    Update your specializations and available timings for this hospital.
                                 </p>
                             </div>
                             <ScheduleBuilder schedules={schedules} onChange={setSchedules} />
                         </section>
 
-                        {/* ── Hospital Photos ── */}
+                        {/* ── Photos ── */}
                         <section className="space-y-3">
                             <h2 className="text-lg font-semibold text-white">Hospital photos</h2>
                             <input
@@ -647,10 +593,10 @@ const Page = () => {
                                 onChange={(e) => onUploadImages(e.target.files)}
                                 className="w-full rounded-xl border border-cyan-100/30 bg-slate-900/70 px-4 py-3 text-slate-100"
                             />
-                            {hospital.images.length > 0 && (
+                            {form.images.length > 0 && (
                                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                                    {hospital.images.map((src, idx) => (
-                                        <div key={`${src}-${idx}`} className="overflow-hidden rounded-lg border border-cyan-100/20">
+                                    {form.images.map((src, idx) => (
+                                        <div key={`${src}-${idx}`} className="group relative overflow-hidden rounded-lg border border-cyan-100/20">
                                             <Image
                                                 src={src}
                                                 alt={`hospital-${idx + 1}`}
@@ -658,27 +604,35 @@ const Page = () => {
                                                 height={120}
                                                 className="h-28 w-full object-cover"
                                             />
+                                            <button
+                                                type="button"
+                                                onClick={() => removeImage(idx)}
+                                                className="absolute top-1.5 right-1.5 hidden group-hover:flex items-center justify-center h-6 w-6 rounded-full bg-red-500/80 text-white text-xs font-bold"
+                                            >
+                                                ✕
+                                            </button>
                                         </div>
                                     ))}
                                 </div>
                             )}
                         </section>
 
-                        {/* ── Submit ── */}
+                        {/* ── Actions ── */}
                         <div className="flex flex-col gap-4 pt-2 sm:flex-row sm:items-center sm:justify-between">
                             <button
-                                onClick={onRegister}
-                                className="inline-flex items-center justify-center rounded-xl bg-cyan-400 px-6 py-3 text-sm font-bold text-slate-950 transition duration-200 hover:scale-[1.01] hover:bg-cyan-300"
+                                onClick={onSave}
+                                disabled={saving}
+                                className="inline-flex items-center justify-center rounded-xl bg-cyan-400 px-8 py-3 text-sm font-bold text-slate-950 transition duration-200 hover:scale-[1.01] hover:bg-cyan-300 disabled:opacity-60 disabled:cursor-not-allowed"
                             >
-                                Register hospital
+                                {saving ? "Saving..." : "Save Changes"}
                             </button>
-
-                            <p className="text-sm text-slate-300">
-                                Already registered?{" "}
-                                <Link href="/login" className="font-semibold text-cyan-200 hover:text-cyan-100">
-                                    Sign in here
-                                </Link>
-                            </p>
+                            <button
+                                type="button"
+                                onClick={() => router.push("/doctors/manage-hospitals")}
+                                className="text-sm text-slate-400 hover:text-slate-200 transition"
+                            >
+                                Cancel
+                            </button>
                         </div>
                     </form>
                 </div>
